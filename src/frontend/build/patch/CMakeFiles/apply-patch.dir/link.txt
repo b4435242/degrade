@@ -1,0 +1,1 @@
+/usr/bin/clang++     CMakeFiles/apply-patch.dir/ApplyPatch.cpp.o  -o apply-patch  -lclangTooling -lclangBasic -lclangASTMatchers 

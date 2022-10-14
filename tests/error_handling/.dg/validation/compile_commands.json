@@ -1,0 +1,20 @@
+[
+  {
+    "arguments": [
+      "clang",
+      "-c",
+      "-fsanitize=address",
+      "-o",
+      "test.o",
+      "test.c",
+      "-I",
+      "/usr/local/lib/clang/16.0.0/include/",
+      "-include",
+      "/home/bill/degradation/src/runtime/runtime.h",
+      "-D",
+      "ANGELIX_INSTRUMENTATION"
+    ],
+    "directory": "/home/bill/degradation/tests/error_handling/.dg/validation/.",
+    "file": "/home/bill/degradation/tests/error_handling/.dg/validation/test.c"
+  }
+]
