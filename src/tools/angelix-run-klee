@@ -1,0 +1,76 @@
+#!/bin/bash
+
+exe="$1"
+shift
+
+if [ -n "$ANGELIX_RUN_EXECUTIONS" ]; then
+    echo -n 1 >> "$ANGELIX_RUN_EXECUTIONS"
+fi
+
+rm -rf "$ANGELIX_KLEE_WORKDIR"/klee-out-*
+rm -rf "$(dirname "$exe")"/klee-out-*
+
+		export ANGELIX_SYMBOLIC_RUNTIME=ON
+libs_klee=$ANGELIX_LIBRARY_PATH_KLEE;
+
+if [ -z $ANGELIX_KLEE_SEARCH ]; then
+    search_arg=""
+else
+    search_arg="--search=$ANGELIX_KLEE_SEARCH"
+fi
+
+if [ -z "$ANGELIX_KLEE_LOAD" ]; then
+    load_arg=""
+else
+    load_arg="$ANGELIX_KLEE_LOAD"
+fi
+
+if [ -z $ANGELIX_KLEE_MAX_FORKS ]; then
+    forks_arg=""
+else
+    forks_arg="-max-forks=$ANGELIX_KLEE_MAX_FORKS"
+fi
+
+if [ -z $ANGELIX_KLEE_MAX_DEPTH ]; then
+    depth_arg=""
+else
+    depth_arg="-max-depth=$ANGELIX_KLEE_MAX_DEPTH"
+fi
+
+if [ -z $ANGELIX_KLEE_MAX_TIME ]; then
+    time_arg=""
+else
+    time_arg="-watchdog -max-time=$ANGELIX_KLEE_MAX_TIME"
+fi
+
+if [ -z $ANGELIX_KLEE_MAX_SOLVER_TIME ]; then
+    solver_time_arg=""
+else
+    solver_time_arg="-max-solver-time=$ANGELIX_KLEE_MAX_SOLVER_TIME"
+fi
+
+if [ -z $ANGELIX_KLEE_DEBUG ]; then
+    debug_arg=""
+else
+    debug_arg="-debug-print-instructions"
+fi
+
+# synthesizer specific args
+if [ -z $ANGELIX_USE_SEMFIX_SYN ]; then
+    # angelix
+    syn_arg="-smtlib-human-readable"
+else
+    # semfix
+    syn_arg=""
+fi
+
+echo "klee $search_arg $forks_arg $depth_arg $time_arg $solver_time_arg $debug_arg $syn_arg $load_arg --link-llvm-lib=$libs_klee -write-smt2s --libc=uclibc --posix-runtime ${exe}"
+
+klee $search_arg $forks_arg $depth_arg $time_arg $solver_time_arg $debug_arg $syn_arg $load_arg --link-llvm-lib=$libs_klee -write-smt2s --libc=uclibc --posix-runtime "${exe}" "$@" #2>&1 | tee klee.log
+
+#mv klee.log "$ANGELIX_KLEE_WORKDIR"
+
+#mv "$(dirname "$exe")"/klee-out-* "$ANGELIX_KLEE_WORKDIR"
+
+# it makes sence to return 0 so that the test can proceed
+exit 0

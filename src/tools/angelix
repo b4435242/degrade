@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -z "$DG_ROOT" ]; then
+    echo 'Error: execute "source /path/to/degradation/activate" to set environment'
+    exit 1
+fi  
+
+python3 "$DG_ROOT/src/repair/main.py" "$@"

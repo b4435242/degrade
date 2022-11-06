@@ -1,0 +1,11 @@
+array bool!choice!7!5!7!26!0!angelic[4] : w32 -> w8 = symbolic
+array int!choice!7!5!7!26!0!env!i[4] : w32 -> w8 = symbolic
+array model_version[4] : w32 -> w8 = symbolic
+(query [(Eq 1
+             (ReadLSB w32 0 model_version))
+         (Eq 10
+             (ReadLSB w32 0 int!choice!7!5!7!26!0!env!i))
+         (Eq false
+             (Eq 0
+                 (ReadLSB w32 0 bool!choice!7!5!7!26!0!angelic)))]
+        false)

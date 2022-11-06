@@ -1,0 +1,581 @@
+2022-11-06 20:47:47 - __main__ - INFO - working_dir /home/bill/degradation/tests/error_handling/.dg
+2022-11-06 20:47:47 - project - INFO - configuring validation source
+2022-11-06 20:47:47 - project - INFO - building json compilation database from validation source
+2022-11-06 20:47:47 - project - INFO - building backend source
+2022-11-06 20:47:47 - project - INFO - CC is angelix-compiler --klee
+2022-11-06 20:47:47 - transformation - INFO - instrumenting suspicious of backend source
+2022-11-06 20:47:47 - transformation - INFO - argv ['instrument-suspicious', 'test.c', '7', '5', '7', '26', '']
+2022-11-06 20:47:47 - project - INFO - building backend source
+2022-11-06 20:47:47 - project - INFO - CC is angelix-compiler --klee
+2022-11-06 20:47:50 - testing - INFO - klee complete
+2022-11-06 20:47:50 - inference - INFO - sleeping for 1 second...
+2022-11-06 20:47:51 - inference - INFO - solving path .dg/backend/klee-out-0/test000002.smt2
+2022-11-06 20:47:51 - inference - INFO - And(And(1 ==
+        Concat(model_version[3],
+               Concat(model_version[2],
+                      Concat(model_version[1],
+                             model_version[0]))),
+        10 ==
+        Concat(int!choice!7!5!7!26!0!env!i[3],
+               Concat(int!choice!7!5!7!26!0!env!i[2],
+                      Concat(int!choice!7!5!7!26!0!env!i[1],
+                             int!choice!7!5!7!26!0!env!i[0])))),
+    0 ==
+    Concat(bool!choice!7!5!7!26!0!angelic[3],
+           Concat(bool!choice!7!5!7!26!0!angelic[2],
+                  Concat(bool!choice!7!5!7!26!0!angelic[1],
+                         bool!choice!7!5!7!26!0!angelic[0]))))
+2022-11-06 20:47:51 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:48:37 - __main__ - INFO - working_dir /home/bill/degradation/tests/error_handling/.dg
+2022-11-06 20:48:37 - project - INFO - configuring validation source
+2022-11-06 20:48:37 - project - INFO - building json compilation database from validation source
+2022-11-06 20:48:37 - project - INFO - building backend source
+2022-11-06 20:48:37 - project - INFO - CC is angelix-compiler --klee
+2022-11-06 20:48:37 - transformation - INFO - instrumenting suspicious of backend source
+2022-11-06 20:48:37 - transformation - INFO - argv ['instrument-suspicious', 'test.c', '7', '5', '7', '26', '']
+2022-11-06 20:48:37 - project - INFO - building backend source
+2022-11-06 20:48:37 - project - INFO - CC is angelix-compiler --klee
+2022-11-06 20:48:40 - testing - INFO - klee complete
+2022-11-06 20:48:40 - inference - INFO - sleeping for 1 second...
+2022-11-06 20:48:41 - inference - INFO - solving path .dg/backend/klee-out-0/test000002.smt2
+2022-11-06 20:48:41 - inference - INFO - And(And(1 ==
+        Concat(model_version[3],
+               Concat(model_version[2],
+                      Concat(model_version[1],
+                             model_version[0]))),
+        10 ==
+        Concat(int!choice!7!5!7!26!0!env!i[3],
+               Concat(int!choice!7!5!7!26!0!env!i[2],
+                      Concat(int!choice!7!5!7!26!0!env!i[1],
+                             int!choice!7!5!7!26!0!env!i[0])))),
+    0 ==
+    Concat(bool!choice!7!5!7!26!0!angelic[3],
+           Concat(bool!choice!7!5!7!26!0!angelic[2],
+                  Concat(bool!choice!7!5!7!26!0!angelic[1],
+                         bool!choice!7!5!7!26!0!angelic[0]))))
+2022-11-06 20:48:41 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:48:41 - inference - INFO - And(1 ==
+    Concat(model_version[3],
+           Concat(model_version[2],
+                  Concat(model_version[1], model_version[0]))),
+    10 ==
+    Concat(int!choice!7!5!7!26!0!env!i[3],
+           Concat(int!choice!7!5!7!26!0!env!i[2],
+                  Concat(int!choice!7!5!7!26!0!env!i[1],
+                         int!choice!7!5!7!26!0!env!i[0]))))
+2022-11-06 20:48:41 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:48:41 - inference - INFO - 1 ==
+Concat(model_version[3],
+       Concat(model_version[2],
+              Concat(model_version[1], model_version[0])))
+2022-11-06 20:48:41 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:48:41 - inference - INFO - 1
+2022-11-06 20:48:41 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:48:41 - inference - INFO - Concat(model_version[3],
+       Concat(model_version[2],
+              Concat(model_version[1], model_version[0])))
+2022-11-06 20:48:41 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:48:41 - inference - INFO - model_version[3]
+2022-11-06 20:48:41 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:48:41 - inference - INFO - model_version
+2022-11-06 20:48:41 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:04 - __main__ - INFO - working_dir /home/bill/degradation/tests/error_handling/.dg
+2022-11-06 20:49:04 - project - INFO - configuring validation source
+2022-11-06 20:49:04 - project - INFO - building json compilation database from validation source
+2022-11-06 20:49:04 - project - INFO - building backend source
+2022-11-06 20:49:04 - project - INFO - CC is angelix-compiler --klee
+2022-11-06 20:49:04 - transformation - INFO - instrumenting suspicious of backend source
+2022-11-06 20:49:04 - transformation - INFO - argv ['instrument-suspicious', 'test.c', '7', '5', '7', '26', '']
+2022-11-06 20:49:04 - project - INFO - building backend source
+2022-11-06 20:49:04 - project - INFO - CC is angelix-compiler --klee
+2022-11-06 20:49:06 - testing - INFO - klee complete
+2022-11-06 20:49:06 - inference - INFO - sleeping for 1 second...
+2022-11-06 20:49:07 - inference - INFO - solving path .dg/backend/klee-out-0/test000002.smt2
+2022-11-06 20:49:07 - inference - INFO - And(And(1 ==
+        Concat(model_version[3],
+               Concat(model_version[2],
+                      Concat(model_version[1],
+                             model_version[0]))),
+        10 ==
+        Concat(int!choice!7!5!7!26!0!env!i[3],
+               Concat(int!choice!7!5!7!26!0!env!i[2],
+                      Concat(int!choice!7!5!7!26!0!env!i[1],
+                             int!choice!7!5!7!26!0!env!i[0])))),
+    0 ==
+    Concat(bool!choice!7!5!7!26!0!angelic[3],
+           Concat(bool!choice!7!5!7!26!0!angelic[2],
+                  Concat(bool!choice!7!5!7!26!0!angelic[1],
+                         bool!choice!7!5!7!26!0!angelic[0]))))
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:49:07 - inference - INFO - And(1 ==
+    Concat(model_version[3],
+           Concat(model_version[2],
+                  Concat(model_version[1], model_version[0]))),
+    10 ==
+    Concat(int!choice!7!5!7!26!0!env!i[3],
+           Concat(int!choice!7!5!7!26!0!env!i[2],
+                  Concat(int!choice!7!5!7!26!0!env!i[1],
+                         int!choice!7!5!7!26!0!env!i[0]))))
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:49:07 - inference - INFO - 1 ==
+Concat(model_version[3],
+       Concat(model_version[2],
+              Concat(model_version[1], model_version[0])))
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:49:07 - inference - INFO - 1
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - Concat(model_version[3],
+       Concat(model_version[2],
+              Concat(model_version[1], model_version[0])))
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - model_version[3]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - model_version
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 3
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - Concat(model_version[2],
+       Concat(model_version[1], model_version[0]))
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - model_version[2]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - model_version
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 2
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - Concat(model_version[1], model_version[0])
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - model_version[1]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - model_version
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 1
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - model_version[0]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - model_version
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 0
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - 10 ==
+Concat(int!choice!7!5!7!26!0!env!i[3],
+       Concat(int!choice!7!5!7!26!0!env!i[2],
+              Concat(int!choice!7!5!7!26!0!env!i[1],
+                     int!choice!7!5!7!26!0!env!i[0])))
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:49:07 - inference - INFO - 10
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - Concat(int!choice!7!5!7!26!0!env!i[3],
+       Concat(int!choice!7!5!7!26!0!env!i[2],
+              Concat(int!choice!7!5!7!26!0!env!i[1],
+                     int!choice!7!5!7!26!0!env!i[0])))
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - int!choice!7!5!7!26!0!env!i[3]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 3
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - Concat(int!choice!7!5!7!26!0!env!i[2],
+       Concat(int!choice!7!5!7!26!0!env!i[1],
+              int!choice!7!5!7!26!0!env!i[0]))
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - int!choice!7!5!7!26!0!env!i[2]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 2
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - Concat(int!choice!7!5!7!26!0!env!i[1],
+       int!choice!7!5!7!26!0!env!i[0])
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - int!choice!7!5!7!26!0!env!i[1]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 1
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - int!choice!7!5!7!26!0!env!i[0]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 0
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - 0 ==
+Concat(bool!choice!7!5!7!26!0!angelic[3],
+       Concat(bool!choice!7!5!7!26!0!angelic[2],
+              Concat(bool!choice!7!5!7!26!0!angelic[1],
+                     bool!choice!7!5!7!26!0!angelic[0])))
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:49:07 - inference - INFO - 0
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - Concat(bool!choice!7!5!7!26!0!angelic[3],
+       Concat(bool!choice!7!5!7!26!0!angelic[2],
+              Concat(bool!choice!7!5!7!26!0!angelic[1],
+                     bool!choice!7!5!7!26!0!angelic[0])))
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - bool!choice!7!5!7!26!0!angelic[3]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 3
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - Concat(bool!choice!7!5!7!26!0!angelic[2],
+       Concat(bool!choice!7!5!7!26!0!angelic[1],
+              bool!choice!7!5!7!26!0!angelic[0]))
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - bool!choice!7!5!7!26!0!angelic[2]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 2
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - Concat(bool!choice!7!5!7!26!0!angelic[1],
+       bool!choice!7!5!7!26!0!angelic[0])
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - bool!choice!7!5!7!26!0!angelic[1]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 1
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:07 - inference - INFO - bool!choice!7!5!7!26!0!angelic[0]
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:07 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:07 - inference - INFO - 0
+2022-11-06 20:49:07 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:33 - __main__ - INFO - working_dir /home/bill/degradation/tests/error_handling/.dg
+2022-11-06 20:49:33 - project - INFO - configuring validation source
+2022-11-06 20:49:33 - project - INFO - building json compilation database from validation source
+2022-11-06 20:49:33 - project - INFO - building backend source
+2022-11-06 20:49:33 - project - INFO - CC is angelix-compiler --klee
+2022-11-06 20:49:33 - transformation - INFO - instrumenting suspicious of backend source
+2022-11-06 20:49:33 - transformation - INFO - argv ['instrument-suspicious', 'test.c', '7', '5', '7', '26', '']
+2022-11-06 20:49:33 - project - INFO - building backend source
+2022-11-06 20:49:33 - project - INFO - CC is angelix-compiler --klee
+2022-11-06 20:49:36 - testing - INFO - klee complete
+2022-11-06 20:49:36 - inference - INFO - sleeping for 1 second...
+2022-11-06 20:49:37 - inference - INFO - solving path .dg/backend/klee-out-0/test000002.smt2
+2022-11-06 20:49:37 - inference - INFO - And(And(1 ==
+        Concat(model_version[3],
+               Concat(model_version[2],
+                      Concat(model_version[1],
+                             model_version[0]))),
+        10 ==
+        Concat(int!choice!7!5!7!26!0!env!i[3],
+               Concat(int!choice!7!5!7!26!0!env!i[2],
+                      Concat(int!choice!7!5!7!26!0!env!i[1],
+                             int!choice!7!5!7!26!0!env!i[0])))),
+    0 ==
+    Concat(bool!choice!7!5!7!26!0!angelic[3],
+           Concat(bool!choice!7!5!7!26!0!angelic[2],
+                  Concat(bool!choice!7!5!7!26!0!angelic[1],
+                         bool!choice!7!5!7!26!0!angelic[0]))))
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:49:37 - inference - INFO - And(1 ==
+    Concat(model_version[3],
+           Concat(model_version[2],
+                  Concat(model_version[1], model_version[0]))),
+    10 ==
+    Concat(int!choice!7!5!7!26!0!env!i[3],
+           Concat(int!choice!7!5!7!26!0!env!i[2],
+                  Concat(int!choice!7!5!7!26!0!env!i[1],
+                         int!choice!7!5!7!26!0!env!i[0]))))
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:49:37 - inference - INFO - 1 ==
+Concat(model_version[3],
+       Concat(model_version[2],
+              Concat(model_version[1], model_version[0])))
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:49:37 - inference - INFO - 1
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - Concat(model_version[3],
+       Concat(model_version[2],
+              Concat(model_version[1], model_version[0])))
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - model_version[3]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - model_version
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 3
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - Concat(model_version[2],
+       Concat(model_version[1], model_version[0]))
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - model_version[2]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - model_version
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 2
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - Concat(model_version[1], model_version[0])
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - model_version[1]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - model_version
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 1
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - model_version[0]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - model_version
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 0
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - 10 ==
+Concat(int!choice!7!5!7!26!0!env!i[3],
+       Concat(int!choice!7!5!7!26!0!env!i[2],
+              Concat(int!choice!7!5!7!26!0!env!i[1],
+                     int!choice!7!5!7!26!0!env!i[0])))
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:49:37 - inference - INFO - 10
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - Concat(int!choice!7!5!7!26!0!env!i[3],
+       Concat(int!choice!7!5!7!26!0!env!i[2],
+              Concat(int!choice!7!5!7!26!0!env!i[1],
+                     int!choice!7!5!7!26!0!env!i[0])))
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - int!choice!7!5!7!26!0!env!i[3]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 3
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - Concat(int!choice!7!5!7!26!0!env!i[2],
+       Concat(int!choice!7!5!7!26!0!env!i[1],
+              int!choice!7!5!7!26!0!env!i[0]))
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - int!choice!7!5!7!26!0!env!i[2]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 2
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - Concat(int!choice!7!5!7!26!0!env!i[1],
+       int!choice!7!5!7!26!0!env!i[0])
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - int!choice!7!5!7!26!0!env!i[1]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 1
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - int!choice!7!5!7!26!0!env!i[0]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 0
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - 0 ==
+Concat(bool!choice!7!5!7!26!0!angelic[3],
+       Concat(bool!choice!7!5!7!26!0!angelic[2],
+              Concat(bool!choice!7!5!7!26!0!angelic[1],
+                     bool!choice!7!5!7!26!0!angelic[0])))
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:49:37 - inference - INFO - 0
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - Concat(bool!choice!7!5!7!26!0!angelic[3],
+       Concat(bool!choice!7!5!7!26!0!angelic[2],
+              Concat(bool!choice!7!5!7!26!0!angelic[1],
+                     bool!choice!7!5!7!26!0!angelic[0])))
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - bool!choice!7!5!7!26!0!angelic[3]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 3
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - Concat(bool!choice!7!5!7!26!0!angelic[2],
+       Concat(bool!choice!7!5!7!26!0!angelic[1],
+              bool!choice!7!5!7!26!0!angelic[0]))
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - bool!choice!7!5!7!26!0!angelic[2]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 2
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - Concat(bool!choice!7!5!7!26!0!angelic[1],
+       bool!choice!7!5!7!26!0!angelic[0])
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - bool!choice!7!5!7!26!0!angelic[1]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 1
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:49:37 - inference - INFO - bool!choice!7!5!7!26!0!angelic[0]
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:49:37 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:49:37 - inference - INFO - 0
+2022-11-06 20:49:37 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:24 - __main__ - INFO - working_dir /home/bill/degradation/tests/error_handling/.dg
+2022-11-06 20:50:24 - project - INFO - configuring validation source
+2022-11-06 20:50:24 - project - INFO - building json compilation database from validation source
+2022-11-06 20:50:24 - project - INFO - building backend source
+2022-11-06 20:50:24 - project - INFO - CC is angelix-compiler --klee
+2022-11-06 20:50:24 - transformation - INFO - instrumenting suspicious of backend source
+2022-11-06 20:50:24 - transformation - INFO - argv ['instrument-suspicious', 'test.c', '7', '5', '7', '26', '']
+2022-11-06 20:50:24 - project - INFO - building backend source
+2022-11-06 20:50:24 - project - INFO - CC is angelix-compiler --klee
+2022-11-06 20:50:26 - testing - INFO - klee complete
+2022-11-06 20:50:26 - inference - INFO - sleeping for 1 second...
+2022-11-06 20:50:27 - inference - INFO - solving path .dg/backend/klee-out-0/test000002.smt2
+2022-11-06 20:50:27 - inference - INFO - And(And(1 ==
+        Concat(model_version[3],
+               Concat(model_version[2],
+                      Concat(model_version[1],
+                             model_version[0]))),
+        10 ==
+        Concat(int!choice!7!5!7!26!0!env!i[3],
+               Concat(int!choice!7!5!7!26!0!env!i[2],
+                      Concat(int!choice!7!5!7!26!0!env!i[1],
+                             int!choice!7!5!7!26!0!env!i[0])))),
+    0 ==
+    Concat(bool!choice!7!5!7!26!0!angelic[3],
+           Concat(bool!choice!7!5!7!26!0!angelic[2],
+                  Concat(bool!choice!7!5!7!26!0!angelic[1],
+                         bool!choice!7!5!7!26!0!angelic[0]))))
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:50:27 - inference - INFO - And(1 ==
+    Concat(model_version[3],
+           Concat(model_version[2],
+                  Concat(model_version[1], model_version[0]))),
+    10 ==
+    Concat(int!choice!7!5!7!26!0!env!i[3],
+           Concat(int!choice!7!5!7!26!0!env!i[2],
+                  Concat(int!choice!7!5!7!26!0!env!i[1],
+                         int!choice!7!5!7!26!0!env!i[0]))))
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:50:27 - inference - INFO - 1 ==
+Concat(model_version[3],
+       Concat(model_version[2],
+              Concat(model_version[1], model_version[0])))
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:50:27 - inference - INFO - 1
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - Concat(model_version[3],
+       Concat(model_version[2],
+              Concat(model_version[1], model_version[0])))
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - model_version[3]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - model_version
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 3
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - Concat(model_version[2],
+       Concat(model_version[1], model_version[0]))
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - model_version[2]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - model_version
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 2
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - Concat(model_version[1], model_version[0])
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - model_version[1]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - model_version
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 1
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - model_version[0]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - model_version
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 0
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - 10 ==
+Concat(int!choice!7!5!7!26!0!env!i[3],
+       Concat(int!choice!7!5!7!26!0!env!i[2],
+              Concat(int!choice!7!5!7!26!0!env!i[1],
+                     int!choice!7!5!7!26!0!env!i[0])))
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:50:27 - inference - INFO - 10
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - Concat(int!choice!7!5!7!26!0!env!i[3],
+       Concat(int!choice!7!5!7!26!0!env!i[2],
+              Concat(int!choice!7!5!7!26!0!env!i[1],
+                     int!choice!7!5!7!26!0!env!i[0])))
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - int!choice!7!5!7!26!0!env!i[3]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 3
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - Concat(int!choice!7!5!7!26!0!env!i[2],
+       Concat(int!choice!7!5!7!26!0!env!i[1],
+              int!choice!7!5!7!26!0!env!i[0]))
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - int!choice!7!5!7!26!0!env!i[2]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 2
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - Concat(int!choice!7!5!7!26!0!env!i[1],
+       int!choice!7!5!7!26!0!env!i[0])
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - int!choice!7!5!7!26!0!env!i[1]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 1
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - int!choice!7!5!7!26!0!env!i[0]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - int!choice!7!5!7!26!0!env!i
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 0
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - 0 ==
+Concat(bool!choice!7!5!7!26!0!angelic[3],
+       Concat(bool!choice!7!5!7!26!0!angelic[2],
+              Concat(bool!choice!7!5!7!26!0!angelic[1],
+                     bool!choice!7!5!7!26!0!angelic[0])))
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BoolRef'>
+2022-11-06 20:50:27 - inference - INFO - 0
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - Concat(bool!choice!7!5!7!26!0!angelic[3],
+       Concat(bool!choice!7!5!7!26!0!angelic[2],
+              Concat(bool!choice!7!5!7!26!0!angelic[1],
+                     bool!choice!7!5!7!26!0!angelic[0])))
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - bool!choice!7!5!7!26!0!angelic[3]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 3
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - Concat(bool!choice!7!5!7!26!0!angelic[2],
+       Concat(bool!choice!7!5!7!26!0!angelic[1],
+              bool!choice!7!5!7!26!0!angelic[0]))
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - bool!choice!7!5!7!26!0!angelic[2]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 2
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - Concat(bool!choice!7!5!7!26!0!angelic[1],
+       bool!choice!7!5!7!26!0!angelic[0])
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - bool!choice!7!5!7!26!0!angelic[1]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 1
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - bool!choice!7!5!7!26!0!angelic[0]
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecRef'>
+2022-11-06 20:50:27 - inference - INFO - bool!choice!7!5!7!26!0!angelic
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.ArrayRef'>
+2022-11-06 20:50:27 - inference - INFO - 0
+2022-11-06 20:50:27 - inference - INFO - <class 'z3.z3.BitVecNumRef'>
+2022-11-06 20:50:27 - inference - INFO - expression (7, 5, 7, 26)[0]: angelic = False
+2022-11-06 20:50:27 - __main__ - INFO - patch generated in 3s
