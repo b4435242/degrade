@@ -8,6 +8,9 @@ build: $(BUILD)
 LLVM_DIR = build/llvm-project
 LLVM_BUILD_DIR = $(LLVM_DIR)/build
 LIBCXX_DIR = $(DG_ROOT)/build/libcxx
+MAXSMT_URL=https://github.com/mechtaev/maxsmt-playground.git
+Z3_URL=https://github.com/mechtaev/z3.git
+
 
 # Frontend #
 
@@ -100,6 +103,26 @@ runtime:
 	cp src/runtime/libangelix.bc bin
 
 z3:
-	#cd build && git clone https://github.com/Z3Prover/z3.git
-	cd build/z3 && python3 scripts/mk_make.py --prefix=/usr/local --python --pypkgdir=/usr/local/lib/python-3.8/site-packages
-	cd build/z3/build && make && sudo make install
+	cd build && git clone --depth=1 $(Z3_URL)
+	cd build/z3 && python3 scripts/mk_make.py --java 
+	cd build/z3/build && make
+
+# MAX-SAT #
+
+maxsmt: $(MAXSMT_DIR)
+	mkdir -p $(MAXSMT_DIR)/lib
+	cp $(Z3_JAR) $(MAXSMT_DIR)/lib/
+	mkdir -p $(MAXSMT_DIR)/log
+	cd $(MAXSMT_DIR) && sbt package
+
+$(MAXSMT_DIR):
+	cd build && git clone --depth=1 $(MAXSMT_URL)
+
+# Synthesis #
+
+synthesis:
+	mkdir -p $(SYNTHESIS_DIR)/lib
+	cp $(MAXSMT_JAR) $(SYNTHESIS_DIR)/lib/
+	cp $(Z3_JAR) $(SYNTHESIS_DIR)/lib/
+	mkdir -p $(SYNTHESIS_DIR)/log
+	cd $(SYNTHESIS_DIR) && sbt assembly
