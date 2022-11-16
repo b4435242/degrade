@@ -460,5 +460,6 @@ class Inferrer:
                         angelic_path[expr].append((angelic, original, env_values))
                     else:
                         angelic_path[expr].append((angelic, None, env_values))
-        
+                    
+                    logger.info(angelic_path)
         return angelic_paths
