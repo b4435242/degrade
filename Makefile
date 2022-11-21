@@ -10,7 +10,7 @@ LLVM_BUILD_DIR = $(LLVM_DIR)/build
 LIBCXX_DIR = $(DG_ROOT)/build/libcxx
 MAXSMT_URL=https://github.com/mechtaev/maxsmt-playground.git
 Z3_URL=https://github.com/mechtaev/z3.git
-
+SYNTHESIS_URL=https://github.com/mechtaev/repair-synthesis.git
 
 # Frontend #
 
@@ -107,6 +107,9 @@ z3:
 	cd build/z3 && python3 scripts/mk_make.py --java 
 	cd build/z3/build && make
 
+javaz3:
+	sudo apt-get install -y libz3-java
+
 # MAX-SAT #
 
 maxsmt: $(MAXSMT_DIR)
@@ -120,9 +123,21 @@ $(MAXSMT_DIR):
 
 # Synthesis #
 
-synthesis:
+synthesis: $(SYNTHESIS_DIR)
 	mkdir -p $(SYNTHESIS_DIR)/lib
 	cp $(MAXSMT_JAR) $(SYNTHESIS_DIR)/lib/
 	cp $(Z3_JAR) $(SYNTHESIS_DIR)/lib/
 	mkdir -p $(SYNTHESIS_DIR)/log
 	cd $(SYNTHESIS_DIR) && sbt assembly
+
+$(SYNTHESIS_DIR):
+	cd src && git clone $(SYNTHESIS_URL)
+
+# Synthesis #
+
+nsynth: mvn
+	mvn install:install-file -Dfile=$(Z3_JAR) -DgroupId=com.microsoft.z3 -DartifactId=z3 -Dversion=4 -Dpackaging=jar
+	cd $(DG_ROOT)/src/nsynth && mvn package
+
+mvn:
+	sudo apt install -y  maven 

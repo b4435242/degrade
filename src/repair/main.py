@@ -11,18 +11,45 @@ from transformation import VulnerableTransformer
 from project import Frontend, Backend, Validation
 from testing import Tester
 from inference import Inferrer
+from synthesis import Synthesizer
+
 from utils import format_time, time_limit, TimeoutException
 
 logging.basicConfig(filename="main.log", level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
 
+SYNTHESIS_LEVELS = ['alternatives',
+                    'integer-constants',
+                    'boolean-constants',
+                    'variables',
+                    'basic-arithmetic',
+                    'basic-logic',
+                    'basic-inequalities',
+                    'extended-arithmetic',
+                    'extended-logic',
+                    'extended-inequalities',
+                    'mixed-conditional',
+                    'conditional-arithmetic']
+
+
 class DG:
     def __init__(self, working_dir, src, buggy, vulnerable, build, configure, config):
+        self.working_dir = working_dir
+        self.config = config
         
-        self.instrument_for_inference = VulnerableTransformer(vulnerable, config)
+
+        extracted = join(working_dir, 'extracted')
+        os.mkdir(extracted)
+
+        angelic_forest_file = join(working_dir, 'last-angelic-forest.json')
+        
+
+        self.instrument_for_inference = VulnerableTransformer(vulnerable, config, extracted)
         self.tester = Tester(config, working_dir)
         self.inferrer = Inferrer(config, self.tester)
+        self.synthesize_fix = Synthesizer(config, extracted, angelic_forest_file, working_dir)
+
 
         validation_dir = join(working_dir, "validation")
         shutil.copytree(src, validation_dir, symlinks=True)
@@ -51,8 +78,11 @@ class DG:
     def generate_patch(self):
         self.instrument_for_inference(self.backend_src)
         self.backend_src.build()
-        self.inferrer(self.backend_src)
-    
+        angelic_path = self.inferrer(self.backend_src)
+        angelic_forest = {}
+        angelic_forest[1] = angelic_path
+        logger.info(angelic_path)
+        initial_fix = self.synthesize_fix(angelic_forest)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -65,6 +95,11 @@ if __name__ == "__main__":
     parser.add_argument('--verbose', default=True)
     parser.add_argument('--mute_build_message', default=True)
     parser.add_argument('--mute_warning', default=True)
+    parser.add_argument('--synthesis-levels', metavar='LEVEL',\
+                        nargs='+', choices=SYNTHESIS_LEVELS,\
+                        default=['alternatives', 'integer-constants', 'boolean-constants'])
+    parser.add_argument('--synthesis-timeout', metavar='MS', type=int, default=30000, 
+                        help='synthesis timeout (default: %(default)s)') # 30 secs
 
     args = parser.parse_args()
 

@@ -9,9 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 class VulnerableTransformer():
-    def __init__(self, vulnerable, config):
+    def __init__(self, vulnerable, config, extracted):
         self.vulnerable = vulnerable
         self.config = config
+        self.extracted = extracted
         if self.config.verbose:
             self.subproc_output = sys.stderr
         else:
@@ -22,7 +23,10 @@ class VulnerableTransformer():
         src = basename(project.dir)
         logger.info('instrumenting suspicious of {} source'.format(src))
         environment = os.environ
-        
+        environment['ANGELIX_EXTRACTED'] = self.extracted
+
+
+
         with cd(project.dir):
             argv = ['instrument-suspicious', project.buggy]
             argv += self.read_vulnerables()

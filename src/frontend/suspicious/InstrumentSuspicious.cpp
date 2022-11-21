@@ -433,9 +433,9 @@ public:
 
       std::ostringstream stmtId;
       stmtId << beginLine << "-" << beginColumn << "-" << endLine << "-" << endColumn;
-      //std::string extractedDir(getenv("ANGELIX_EXTRACTED"));
-      //std::ofstream fs(extractedDir + "/" + stmtId.str() + ".smt2");
-      //fs << "(assert (not (= 1 0)))\n";
+      std::string extractedDir(getenv("ANGELIX_EXTRACTED"));
+      std::ofstream fs(extractedDir + "/" + stmtId.str() + ".smt2");
+      fs << "(assert (not (= 1 0)))\n";
 
       const DynTypedNode node = DynTypedNode::create(*stmt);
       std::pair< std::unordered_set<VarDecl*>, std::unordered_set<MemberExpr*> > varsFromScope = collectVarsFromScope(node, Result.Context, beginLine, Rewrite);
