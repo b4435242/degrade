@@ -294,4 +294,10 @@ StatementMatcher InterestingCall =
 StatementMatcher InterestingStatement =
   anyOf(InterestingAssignment, InterestingCall, breakStmt().bind("repairable"),continueStmt().bind("repairable"));
 
+
+// DG
+DeclarationMatcher MainFunctionMatcher = functionDecl(hasName("main")).bind("mainFunctionDecl");
+StatementMatcher StmtMatcher = stmt().bind("stmt");
+
+
 #endif // ANGELIX_COMMON_H

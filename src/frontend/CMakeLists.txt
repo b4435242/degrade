@@ -5,3 +5,4 @@
 
 add_subdirectory(suspicious)
 add_subdirectory(patch)
+add_subdirectory(record)
