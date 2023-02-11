@@ -42,8 +42,6 @@ def askey(n):
 def get_vars(f):
     r = set()
     def collect(f):
-        logger.info(f)
-        logger.info(type(f))
         if z3.z3.is_const(f):
             if f.decl().kind() == z3.z3.Z3_OP_UNINTERPRETED and not askey(f) in r:
                 r.add(askey(f))
@@ -174,12 +172,12 @@ class Inferrer:
             baf.append(bpath)
         return baf
 
-    def __call__(self, project):
-        #logger.info('inferring specification for test \'{}\''.format(test))
+    def __call__(self, project, test):
+        logger.info('inferring specification for test \'{}\''.format(test))
         environment = os.environ
 
         klee_start_time = time.time()
-        self.run_test(project , klee=True, env=environment)
+        self.run_test(project, test, klee=True, env=environment)
         klee_end_time = time.time()
         klee_elapsed = klee_end_time - klee_start_time
         #statistics.data['time']['klee'] += klee_elapsed
@@ -204,6 +202,9 @@ class Inferrer:
             if not smt_id in err_list:
                 non_error_smt_files.append(smt)
 
+        logger.info(non_error_smt_files)
+        positive = len(err_list) == 0
+        
         #if not self.config['ignore_infer_errors']:
         smt_files = non_error_smt_files
 
@@ -244,7 +245,6 @@ class Inferrer:
         solver = Solver()
 
         for smt in smt_files:
-            logger.info('solving path {}'.format(relpath(smt)))
 
             try:
                 path = z3.z3.parse_smt2_file(smt)
@@ -456,6 +456,10 @@ class Inferrer:
                         value = from_bv_converter_by_type['int'](bv_env)
                         env_values[name] = value
 
+                    # if no error, place true only
+                    
+                    if positive and angelic==False:
+                        continue
                     if original_available:
                         angelic_path[expr].append((angelic, original, env_values))
                     else:
@@ -463,8 +467,10 @@ class Inferrer:
                     
                     logger.info(angelic_path)
         
+            
+            if all(len(_path)>0 for expr, _path in angelic_path.items()):        
+                angelic_paths.append(angelic_path)
 
-        angelic_paths.append(angelic_path)
-
+        
 
         return angelic_paths

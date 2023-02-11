@@ -82,7 +82,7 @@ class Synthesizer:
         patch_file = join(dirpath, 'patch')
         config_file = join(dirpath, 'config.json')
         logger.info(config_file)
-        for level in SYNTHESIS_LEVELS:#self.config.synthesis_levels:
+        for level in self.config.synthesis_levels:
 
             logger.info('synthesizing patch with component level \'{}\''.format(level))
 

@@ -1,186 +1,357 @@
-#include "clang/ASTMatchers/ASTMatchers.h"
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/Tooling/CommonOptionsParser.h"
-#include "llvm/Support/CommandLine.h"
-#include "clang/AST/AST.h"
-#include "clang/AST/ASTContext.h"
-#include "clang/AST/ASTConsumer.h"
-#include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/Frontend/ASTConsumers.h"
-#include "clang/Frontend/FrontendActions.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Tooling/CommonOptionsParser.h"
-#include "clang/Tooling/Tooling.h"
-#include "clang/Rewrite/Core/Rewriter.h"
-#include "llvm/Support/raw_ostream.h"
-
+#include <iostream>
 #include <sstream>
+#include <string>
+#include <unordered_set>
+#include <unordered_map>
+#include <fstream>
+#include <vector>
 
-using namespace clang::driver;
-using namespace clang::ast_matchers;
-using namespace clang::tooling;
-using namespace clang;
+#include "../AngelixCommon.h"
+#include "../util.h"
 
-class FunctionFinderVisitor
-    : public RecursiveASTVisitor<FunctionFinderVisitor> {
- public:
-  FunctionFinderVisitor(ASTContext *Context, int Line, int Column)
-      : Context(Context), Line(Line), Column(Column) {}
+std::vector<int> restoreLocation;
 
-  bool VisitFunctionDecl(FunctionDecl *Declaration) {
-    // Check if the given line and column fall within the source range of the
-    // function declaration.
-    SourceLocation Start = Declaration->getBeginLoc();
-    SourceLocation End = Declaration->getEndLoc();
-    if (Context->getSourceManager().isBeforeInTranslationUnit(Start, End) &&
-    		Context->getSourceManager().isBeforeInTranslationUnit(
-            Start, SourceLocation::getFromRawEncoding(Line)) &&
-        Context->getSourceManager().isBeforeInTranslationUnit(
-            SourceLocation::getFromRawEncoding(Line), End)) {
-    	// The given line and column fall within the function declaration.
-    	FunctionName = Declaration->getNameAsString();
 
-		std::string FunctionCall = FunctionName + "(";
 
-		// Add the function arguments to the string.
-		for (int i = 0, e = Declaration->getNumParams(); i != e; ++i) {
-  			if (i > 0)
-    			FunctionCall += ", ";
-  			FunctionCall += "0";
-		}
 
-		FunctionCall += ")"; 				
+void parse_locations(const char** argv, int offset){
+	int count = offset;
+	
+	for(int i=0; i<4; i++) 
+		restoreLocation.push_back(atoi(argv[count++]));
+	
+}
 
-      return true;
+template<typename T>
+int getSize(T vd) {
+    const clang::Type *type = vd->getType().getTypePtr();
+    while (type->isPointerType()){
+        type = type->getPointeeType().getTypePtr();
     }
-    return true;
-  }
+    /*if (type->isRecordType()){
+        const RecordType *rtype = dyn_cast<RecordType>(type);
+        if (!rtype || !rtype->getDecl()) // exclude if size is not determined
+            return 0;
+    }*/
 
-  std::string GetFunctionName() const { return FunctionName; }
-  std::string GetFunctionCall() const { return FunctionCall; }
+    return vd->getASTContext().getTypeInfo(type).Width;
+}
 
 
- private:
-  ASTContext *Context;
-  int Line;
-  int Column;
-  std::string FunctionName;
-  std::string FunctionCall;
+class FunctionFinderVisitor: public RecursiveASTVisitor<FunctionFinderVisitor> {
+public:
+	FunctionFinderVisitor(ASTContext *Context, Rewriter &R): Context(Context),Rewrite(R) {}
+
+	bool VisitFunctionDecl(FunctionDecl *funcDecl) {
+    	// Check if the given line and column fall within the source range of the function declaration.
+    	if (!funcDecl->hasBody()) 
+			return true;
+		Stmt* funcBody = funcDecl->getBody();
+		SourceManager &srcMgr = Rewrite.getSourceMgr();
+		int beginLine = srcMgr.getExpansionLineNumber(funcBody->getBeginLoc());
+		int endLine = srcMgr.getExpansionLineNumber(funcBody->getEndLoc());
+		if (restoreLocation[0]>beginLine && restoreLocation[2]<endLine){
+        	// The given line and column fall within the function declaration.
+       		FunctionName = funcDecl->getNameInfo().getAsString();
+        	FunctionCall = FunctionName + "(";
+
+        	// Add the function arguments to the string.
+        	for (int i = 0, e = funcDecl->getNumParams(); i != e; ++i) {
+            	if (i > 0)
+                	FunctionCall += ", ";
+            	FunctionCall += "0";
+        	}
+
+        	FunctionCall += ")";
+
+      		return true;
+    	}
+    	return true;
+  	}
+
+	std::string getFunctionName() const { return FunctionName; }
+	std::string getFunctionCall() const { return FunctionCall; }
+
+
+private:
+	ASTContext *Context;
+	Rewriter &Rewrite;
+	std::string FunctionName;
+	std::string FunctionCall;
 };
 
 class MainFunctionRewriter : public MatchFinder::MatchCallback {
 public:
-  MainFunctionRewriter(Rewriter &Rewrite, std::string FunctionCall) : Rewrite(Rewrite), FakeFunctionCall(FunctionCall) {}
+	MainFunctionRewriter(Rewriter &Rewrite) : Rewrite(Rewrite) {}
 
-  virtual void run(const MatchFinder::MatchResult &Result) {
-    // Get the main function declaration from the match result
-    if (const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("mainFunctionDecl")) {
-      // Check if the function has a body (definition)
-      if (FD->hasBody()) {
-        // Replace the entire function body with a single statement
-        Rewrite.ReplaceText(FD->getSourceRange(), FakeFunctionCall);
-      }
-    }
-  }
+	virtual void run(const MatchFinder::MatchResult &Result) {
+		// Get the main function declaration from the match result
+		if (const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("mainFunctionDecl")) {
+			// Check if the function has a body (definition)
+			if (FD->hasBody()) {
+				// Replace the entire function body with a single statement
+				std::ostringstream harnessStream;
+				harnessStream << "{ " << restoreFunctionCall << "; }\n";
+				Rewrite.ReplaceText(FD->getBody()->getSourceRange(), harnessStream.str());
+			}
+		}
+	} 
+	
+	void setFunction(std::string& fc){
+		restoreFunctionCall = fc;
+	} 
 
 private:
-  Rewriter &Rewrite;
-  std::string FakeFunctionCall;
+	Rewriter &Rewrite;
+	std::string restoreFunctionCall;
 };
 
-class StmtDeleter : public MatchFinder::MatchCallback {
+class RestoreStmtVisitor : public clang::RecursiveASTVisitor<RestoreStmtVisitor> {
 public:
-  StmtDeleter(Rewriter &Rewrite, std::vector<int> TargetLocation)
-      : Rewrite(Rewrite), TargetLocation(TargetLocation) {}
+	RestoreStmtVisitor(Rewriter &Rewrite, ASTContext* Context): Rewrite(Rewrite), Context(Context) {}
 
-  virtual void run(const MatchFinder::MatchResult &Result) {
-    // Get the function declaration and statement from the match result
-    SourceManager &srcMgr = Rewrite.getSourceMgr();
+	bool VisitStmt(Stmt *S) {
 
+		
 
-	if (const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("targetFunctionDecl")) {
-      if (const Stmt *S = Result.Nodes.getNodeAs<Stmt>("stmt")) {
-        // Check if the function and statement match the target function and location
-        int beginLine = srcMgr.getExpansionLineNumber(S->getBeginLoc());
+		SourceManager &srcMgr = Rewrite.getSourceMgr();
+		int beginLine = srcMgr.getExpansionLineNumber(S->getBeginLoc());
 		int beginCol = srcMgr.getExpansionColumnNumber(S->getBeginLoc());
 		int endLine = srcMgr.getExpansionLineNumber(S->getEndLoc());
 		int endCol = srcMgr.getExpansionColumnNumber(S->getEndLoc());
-		if (beginLine<TargetLocation[0] || (beginLine==TargetLocation[0] && beginCol<TargetLocation[1]) ) {
-          // Delete the statement from the source code
-          Rewrite.RemoveText(S->getSourceRange());
-        }
-		if (beginLine==TargetLocation[0] && beginCol==TargetLocation[1]){
-			std::ostringstream stringStream;
+	
+		std::cout<<toString(S)<<std::endl;
+
+		if (!isa<DeclStmt>(S) && S->getBeginLoc().isValid() && (endLine<restoreLocation[0] || (endLine==restoreLocation[0] && endCol<restoreLocation[1])) ) {
+			// Delete the statement from the source code
+			Rewrite.RemoveText(S->getSourceRange());
+			return true;	
+		}
+		else if (beginLine==restoreLocation[0] && beginCol==restoreLocation[1] && endLine==restoreLocation[2] && endCol==restoreLocation[3]){
+		
+			const DynTypedNode node = DynTypedNode::create(*S);	
+			enum VarTypes collectedTypes = ALL;
+			std::pair< std::unordered_set<VarDecl*>, std::unordered_set<MemberExpr*>> varsFromScope = collectVarsFromScope(node, Context, beginLine, Rewrite, collectedTypes);
+			std::unordered_set<VarDecl*> vars;
+			vars.insert(varsFromScope.first.begin(), varsFromScope.first.end());
+			std::unordered_map<std::string, RecordDecl::field_iterator> ptrs;
+			std::unordered_map<std::string, std::string> exprs;
+			getPtrInStruct(Context, vars, ptrs, exprs);
+			
+			std::ostringstream stringStream; 
+      		//FIXME: why no members here?
+			std::ostringstream exprStream;
+			std::ostringstream nameStream;
+			std::ostringstream typeStream;
+      		std::ostringstream sizeStream;
+			bool first = true;
+			for (auto it = vars.begin(); it != vars.end(); ++it) {
+        		
+				VarDecl* var = *it;
+				/*if (first) {
+        			first = false;
+        		} else {
+          			exprStream << ", ";
+          			nameStream << ", ";
+          			typeStream << ", ";
+          			sizeStream << ", ";
+        		}
+        		VarDecl* var = *it;
+        		exprStream << "&" << var->getName().str();
+        		nameStream << "\"" << var->getName().str() << "\"";
+        		typeStream << "\"" << var->getType().getAsString() << "\"" ;
+        		sizeStream << getSize<VarDecl*>(var)/8;
+      		*/
+				stringStream << "DG_RESTORE("
+						 << beginLine << ", "
+						 << beginCol << ", "
+						 << endLine << ", "
+						 << endCol << ", "
+						 << "\"" << var->getName().str() << "\"" << ", " 
+						 << "\"" << var->getType().getAsString() << "\"" << ", "
+						 << "&" << var->getName().str() << ", "
+						 << getSize<VarDecl*>(var)/8
+						 << ");\n";
+						 
+			}
+	
+			int n_ptr_in_struct = 0;
+			for (auto it = ptrs.begin(); it != ptrs.end(); ++it) {
+        		std::string name = it->first;
+        		std::string expr = exprs[name];
+				auto var = it->second;
+
+        		int size = getSize<RecordDecl::field_iterator>(var)/8;
+        		if (size==0) 
+            		continue;
+        		/*if (first) {
+          			first = false;
+        		} else {
+          			exprStream << ", ";
+          			nameStream << ", ";
+		  			typeStream << ", ";
+		  			sizeStream << ", ";
+        		}
+				exprStream << expr;
+        		nameStream << "\"" << var->getName().str() << "\"";
+      			typeStream << "\"" << var->getType().getAsString() << "\"" ;
+				sizeStream << size;
+        		n_ptr_in_struct++;*/
+				stringStream << "DG_RESTORE("
+						 << beginLine << ", "
+						 << beginCol << ", "
+						 << endLine << ", "
+						 << endCol << ", "
+						 << "\"" << name << "\"" << ", " 
+						 << "\"" << var->getType().getAsString() << "\"" << ", "
+						 << expr << ", "
+						 << size
+						 << ");\n";
+				
+    		}
+
+
+			stringStream << toString(S);
+      		int size = vars.size() + n_ptr_in_struct;
+			/*std::ostringstream stringStream;
 			stringStream << "DG_RESTORE("
 						 << beginLine << ", "
 						 << beginCol << ", "
 						 << endLine << ", "
-						 << endCol
+						 << endCol << ", "
+						 << "((char*[]){" << nameStream.str() << "}), "
+                  		 << "((char*[]){" << typeStream.str() << "}), "
+                   		 << "((void*[]){" << exprStream.str() << "}), "
+                   		 << "((int[]){" << sizeStream.str() << "}), "
+                   		 << size
 						 << ");\n";
+			stringStream << toString(S);*/
 			Rewrite.ReplaceText(S->getSourceRange(), stringStream.str());
+			return false;
 		}
-      }
+		//return RecursiveASTVisitor<RestoreStmtVisitor>::TraverseStmt(S);
+		return true;
+	}
+
+private:
+	Rewriter &Rewrite;
+	ASTContext* Context;
+};
+
+class FunctionVisitor : public clang::RecursiveASTVisitor<FunctionVisitor> {
+public:
+	FunctionVisitor(Rewriter &R, ASTContext* Context, std::string restoreFuncName): Rewrite(R), Context(Context), restoreFuncName(restoreFuncName) {}
+	
+	/*virtual void run(const MatchFinder::MatchResult &Result) {
+		RestoreStmtVisitor restoreStmtVisitor(Rewrite, Result.Context);	
+    	if (const FunctionDecl *funcDecl = Result.Nodes.getNodeAs<FunctionDecl>("restoreFunctionDecl")) {
+      		// Create a RestoreStmtVisitor to traverse the statements in the function.
+    		restoreStmtVisitor.TraverseStmt(funcDecl->getBody());
+    	}
+	}*/
+
+	bool VisitFunctionDecl(FunctionDecl* fd){
+		if (fd->getNameAsString()==restoreFuncName){
+			RestoreStmtVisitor restoreStmtVisitor(Rewrite, Context);
+			restoreStmtVisitor.TraverseStmt(fd->getBody());
+			return false;
+		}
+		return true;
+	}
+
+
+private:
+	Rewriter &Rewrite;
+	std::string restoreFuncName;
+	//RestoreStmtVisitor restoreStmtVisitor;
+	ASTContext* Context;
+};
+
+
+
+
+class MyASTConsumer : public ASTConsumer {
+public:
+	MyASTConsumer(Rewriter &R) : HandlerForMainFunction(R),
+								 //HandlerForRestoreFunction(R),
+								 Visitor(NULL, R),
+								 Rewrite(R)
+	{							 		
+		//Finder.addMatcher(MainFunctionMatcher, &HandlerForMainFunction);
+		
+	}
+
+	void HandleTranslationUnit(ASTContext &Context) override {
+		
+    	Visitor.TraverseDecl(Context.getTranslationUnitDecl());
+		std::string restoreFunctionName = Visitor.getFunctionName();
+		std::string restoreFunctionCall = Visitor.getFunctionCall();
+		
+		HandlerForMainFunction.setFunction(restoreFunctionCall);
+		
+		//DeclarationMatcher restoreFunctionMatcher = functionDecl(hasName(restoreFunctionName)).bind("restoreFunctionDecl");
+		//Finder.addMatcher(restoreFunctionMatcher, &HandlerForRestoreFunction);
+		//Finder.matchAST(Context);
+
+		FunctionVisitor visitor(Rewrite, &Context, restoreFunctionName);
+		visitor.TraverseDecl(Context.getTranslationUnitDecl());
+
+		
+	}
+
+private:
+	MainFunctionRewriter HandlerForMainFunction;	
+	//RestoreFunctionRewriter HandlerForRestoreFunction; 
+
+	MatchFinder Finder;
+	
+	FunctionFinderVisitor Visitor;
+	Rewriter &Rewrite;
+};
+
+
+class MyFrontendAction : public ASTFrontendAction {
+public:
+  MyFrontendAction() {}
+
+  void EndSourceFileAction() override {
+    FileID ID = TheRewriter.getSourceMgr().getMainFileID();
+    if (INPLACE_MODIFICATION) {
+      //overwriteMainChangedFile(TheRewriter);
+      TheRewriter.overwriteChangedFiles();
+    } else {
+      TheRewriter.getEditBuffer(ID).write(llvm::outs());
     }
   }
 
+  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) override {
+    TheRewriter.setSourceMgr(CI.getSourceManager(), CI.getLangOpts());
+    return std::make_unique<MyASTConsumer>(TheRewriter);
+  }
+
 private:
-  Rewriter &Rewrite;
-  std::vector<int> TargetLocation;
+  Rewriter TheRewriter;
 };
 
-std::vector<std::string> get_targetFunction(ClangTool &Tool, int Line, int Column){
-	// Run the tool and get the AST.
-  ASTContext *Context = nullptr;
-  FunctionFinderVisitor Visitor(Context, Line, Column);
-  Tool.run(newFrontendActionFactory(&Visitor).get());
 
-  // Get the function name from the visitor.
-  std::vector<std::string> v(2);
-  v[0] = Visitor.GetFunctionName();
-  v[1] = Visitor.GetFunctionCall();
-  return v;
-}
+// Apply a custom category to all command-line options so that they are the only ones displayed.
+static llvm::cl::OptionCategory MyToolCategory("angelix options");
 
-
-
-
-
-
-static llvm::cl::OptionCategory MyToolCategory("dg options");
 
 int main(int argc, const char **argv) {
-  argc = 2;
-  CommonOptionsParser OptionsParser(argc, argv, MyToolCategory);
-  ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
+	// CommonOptionsParser constructor will parse arguments and create a
+	// CompilationDatabase.  In case of error it will terminate the program.
+	parse_locations(argv, 2);
+	argc = 2;
+	// clang 16
+	//auto ExpectedParser = CommonOptionsParser::create(argc, argv, MyToolCategory);
+	//CommonOptionsParser &OptionsParser = ExpectedParser.get();
 
-	// arg
-	int beginLine = atoi(argv[2]);
-	int beginCol = atoi(argv[3]);
-	int endLine = atoi(argv[4]);
-	int endCol = atoi(argv[5]);
-	std::vector<int> TargetLocation({beginLine, beginCol, endLine, endCol});
-	std::vector<std::string> target = get_targetFunction(Tool, beginLine, beginCol); 
-	std::string FunctionName = target[0], FunctionCall = target[1];
+	//clang 11
+	CommonOptionsParser OptionsParser(argc, argv, MyToolCategory);
 
+	// We hand the CompilationDatabase we created and the sources to run over into the tool constructor.
+	ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
 
-  MatchFinder Finder;
-  
-  // Set up the AST matcher for the main function declaration
-  DeclarationMatcher MainFunctionMatcher = functionDecl(hasName("main")).bind("mainFunctionDecl");
-  MainFunctionRewriter mainRewriter(Tool.getRewriter(), FunctionCall);
-  Finder.addMatcher(MainFunctionMatcher, &mainRewriter);
-
-
-  // Set up the AST matcher for function declarations and statements
-  DeclarationMatcher FunctionMatcher = functionDecl(hasName(FunctionName)).bind("targetFunctionDecl");
-  StatementMatcher StmtMatcher = stmt().bind("stmt");
-  Finder.addMatcher(FunctionMatcher, &StmtMatcher);
-
-
-  StmtDeleter Deleter(Tool.getRewriter(), TargetLocation);
-  Finder.addMatcher(StmtMatcher, &Deleter);
-
-  // Run the tool and collect the main function declaration
-  return Tool.run(newFrontendActionFactory(&Finder).get());
+	return Tool.run(newFrontendActionFactory<MyFrontendAction>().get());
 }
-

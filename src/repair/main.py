@@ -7,7 +7,7 @@ import statistics
 import time
 import logging
 
-from transformation import VulnerableTransformer
+from transformation import VulnerableTransformer, FixInjector
 from project import Frontend, Backend, Validation
 from testing import Tester
 from inference import Inferrer
@@ -34,10 +34,10 @@ SYNTHESIS_LEVELS = ['alternatives',
 
 
 class DG:
-    def __init__(self, working_dir, src, buggy, vulnerable, build, configure, config):
+    def __init__(self, working_dir, src, buggy, oracle, tests, vulnerable, build, configure, config):
         self.working_dir = working_dir
         self.config = config
-        
+        self.test_suite = tests[:]
 
         extracted = join(working_dir, 'extracted')
         os.mkdir(extracted)
@@ -46,10 +46,10 @@ class DG:
         
 
         self.instrument_for_inference = VulnerableTransformer(vulnerable, config, extracted)
-        self.tester = Tester(config, working_dir)
-        self.inferrer = Inferrer(config, self.tester)
+        self.tester = Tester(oracle, config, working_dir)
+        self.infer_spec = Inferrer(config, self.tester)
         self.synthesize_fix = Synthesizer(config, extracted, angelic_forest_file, working_dir)
-
+        self.apply_patch = FixInjector(config)
 
         validation_dir = join(working_dir, "validation")
         shutil.copytree(src, validation_dir, symlinks=True)
@@ -64,6 +64,7 @@ class DG:
         self.frontend_src = Frontend(config, frontend_dir, buggy, build, configure)
         self.frontend_src.import_compilation_db(compilation_db)
         #self.frontend_src.initialize()
+		self.frontend_src.build()
 
         backend_dir = join(working_dir, "backend")
         shutil.copytree(src, backend_dir, symlinks=True)
@@ -77,19 +78,28 @@ class DG:
 
     def generate_patch(self):
         self.instrument_for_inference(self.backend_src)
+        self.backend_src.configure()
         self.backend_src.build()
-        angelic_path = self.inferrer(self.backend_src)
+        
         angelic_forest = {}
-        angelic_forest[1] = angelic_path
-        logger.info(angelic_path)
+        for test in self.test_suite:
+            angelic_path = self.infer_spec(self.backend_src, test)
+            angelic_forest[test] = angelic_path
+        logger.info(angelic_forest)
         initial_fix = self.synthesize_fix(angelic_forest)
+        self.apply_patch(self.validation_src, initial_fix)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--src', metavar='SOURCE', help='source directory')
     parser.add_argument('--buggy', metavar='BUGGY', help='relative path to buggy file')
+    parser.add_argument('--record', metavar='RECORD', help='relative path to record file')
+    parser.add_argument('--oracle', metavar='ORACLE', help='oracle script')
+    parser.add_argument('--tests', metavar='TEST', nargs='+', help='test case')
     parser.add_argument('--vulnerable', help='file specifying addresses of vulnerable statements')
+    parser.add_argument('--entry', help='file specifying addresses of entry statements')
     parser.add_argument('--build', default='make -e') # -e with modified environment
     parser.add_argument('--configure', default=None)
     parser.add_argument('--verbose', default=True)
@@ -117,7 +127,7 @@ if __name__ == "__main__":
 
     start = time.time()
     
-    tool = DG(working_dir, args.src, args.buggy, args.vulnerable, args.build, args.configure, args)
+    tool = DG(working_dir, args.src, args.buggy, args.oracle, args.tests, args.vulnerable, args.build, args.configure, args)
     tool.generate_patch()
     
 

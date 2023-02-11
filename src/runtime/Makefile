@@ -6,7 +6,13 @@ SRC = runtime.c
 OBJ_KLEE = $(SRC:%.c=%.klee.o)
 OBJ_TEST = $(SRC:%.c=%.test.o)
 
-all: libangelix.bc  #libangelix.test.a libangelix.klee.a
+all: libangelix.bc dg_record.o   #libangelix.test.a libangelix.klee.a
+
+dg_record.o:
+	gcc -g record.c -c 
+	gcc -g ht_table.c -c
+	gcc -g restore.c -c 
+	ld -r record.o ht_table.o restore.o -o $@
 
 libangelix.bc: $(SRC) $(DEP)
 	clang-11 -g -O0 -emit-llvm -c -o $@ $< $(CFLAGS)

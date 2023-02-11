@@ -25,91 +25,6 @@ using namespace llvm;
 #define INPLACE_MODIFICATION 1
 
 
-unsigned getDeclExpandedLine(const clang::Decl* decl, SourceManager &srcMgr) {
-  SourceLocation startLoc = decl->getBeginLoc();
-  if(startLoc.isMacroID()) {
-    // Get the start/end expansion locations
-    CharSourceRange expansionRange = srcMgr.getExpansionRange(startLoc);
-    // We're just interested in the start location
-    startLoc = expansionRange.getBegin();
-  }
-
-  return srcMgr.getExpansionLineNumber(startLoc);
-}
-
-
-bool insideMacro(const clang::Stmt* expr, SourceManager &srcMgr, const LangOptions &langOpts) {
-  SourceLocation startLoc = expr->getBeginLoc();
-  SourceLocation endLoc = expr->getEndLoc();
-
-  if(startLoc.isMacroID() && !Lexer::isAtStartOfMacroExpansion(startLoc, srcMgr, langOpts))
-    return true;
-  
-  if(endLoc.isMacroID() && !Lexer::isAtEndOfMacroExpansion(endLoc, srcMgr, langOpts))
-    return true;
-
-  return false;
-}
-
-
-SourceRange getExpandedLoc(const clang::Stmt* expr, SourceManager &srcMgr) {
-  SourceLocation startLoc = expr->getBeginLoc();
-  SourceLocation endLoc = expr->getEndLoc();
-
-  if(startLoc.isMacroID()) {
-    // Get the start/end expansion locations
-    CharSourceRange expansionRange = srcMgr.getExpansionRange(startLoc);
-    // We're just interested in the start location
-    startLoc = expansionRange.getBegin();
-  }
-  if(endLoc.isMacroID()) {
-    // Get the start/end expansion locations
-    CharSourceRange expansionRange = srcMgr.getExpansionRange(startLoc);
-    // We're just interested in the end location
-    endLoc = expansionRange.getEnd();
-  }
-      
-  SourceRange expandedLoc(startLoc, endLoc);
-
-  return expandedLoc;
-}
-
-
-std::string toString(const clang::Stmt* stmt) {
-  /* Special case for break and continue statement
-     Reason: There were semicolon ; and newline found
-     after break/continue statement was converted to string
-  */
-  if (dyn_cast<clang::BreakStmt>(stmt))
-    return "break";
-  
-  if (dyn_cast<clang::ContinueStmt>(stmt))
-    return "continue";
-
-  clang::LangOptions LangOpts;
-  clang::PrintingPolicy Policy(LangOpts);
-  std::string str;
-  llvm::raw_string_ostream rso(str);
-
-  stmt->printPretty(rso, nullptr, Policy);
-
-  std::string stmtStr = rso.str();
-  return stmtStr;
-}
-
-
-bool overwriteMainChangedFile(Rewriter &TheRewriter) {
-  bool AllWritten = true;
-  FileID id = TheRewriter.getSourceMgr().getMainFileID();
-  const FileEntry *Entry = TheRewriter.getSourceMgr().getFileEntryForID(id);
-  std::error_code err_code;  
-  llvm::raw_fd_ostream out(Entry->getName(), err_code, llvm::sys::fs::OF_None);
-  TheRewriter.getRewriteBufferFor(id)->write(out);
-  out.close();
-  return !AllWritten;
-}
-
-
 // Matchers for repairable expressions:
 
 StatementMatcher RepairableNode =
@@ -292,11 +207,11 @@ StatementMatcher InterestingCall =
 
 
 StatementMatcher InterestingStatement =
-  anyOf(InterestingAssignment, InterestingCall, breakStmt().bind("repairable"),continueStmt().bind("repairable"));
+  anyOf(InterestingAssignment, InterestingCall, declStmt().bind("repairable"), breakStmt().bind("repairable"),continueStmt().bind("repairable"));
 
 
 // DG
-DeclarationMatcher MainFunctionMatcher = functionDecl(hasName("main")).bind("mainFunctionDecl");
+DeclarationMatcher MainFunctionMatcher = anyOf(functionDecl(hasName("main")).bind("mainFunctionDecl"), functionDecl(hasName("MAIN")).bind("mainFunctionDecl"));
 StatementMatcher StmtMatcher = stmt().bind("stmt");
 
 

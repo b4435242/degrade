@@ -82,9 +82,9 @@ class Project:
         self.compilation_db = copy.deepcopy(compilation_db)
         for item in self.compilation_db:
             item['directory'] = join(self.dir, item['directory'])
-            item['file'] = join(self.dir, self.buggy)
+            item['file'] = os.path.basename(item['file'])
             # this is a temporary hack. It general case, we need (probably) a different workflow:
-            wrong_dir = realpath(join(self.dir, '..', 'validation'))
+            #wrong_dir = realpath(join(self.dir, '..', 'validation'))
             #item['arguments'] = item['arguments'].replace(wrong_dir, self.dir)
 
             item['arguments'] += ('-I', os.environ['LLVM_INCLUDE_PATH'])
@@ -152,6 +152,7 @@ class Validation(Project):
 
 
 class Frontend(Project):
+	
 
     def build(self):
         logger.info('building {} source'.format(basename(self.dir)))

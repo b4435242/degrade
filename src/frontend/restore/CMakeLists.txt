@@ -4,14 +4,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
 
 
-add_executable(record-snapshot
-  RecordSnapshot.cpp
+add_executable(restore-snapshot
+  RestoreSnapshot.cpp
   ../suspicious/SMTLIB2.cpp
   ../util.cpp
   )
 
 
-target_link_libraries(record-snapshot
+target_link_libraries(restore-snapshot
   PRIVATE
   #${llvm_libs}
   clangTooling

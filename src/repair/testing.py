@@ -11,12 +11,12 @@ logger = logging.getLogger(__name__)
 
 class Tester:
 
-    def __init__(self, config, workdir):
+    def __init__(self, oracle, config, workdir):
         self.config = config
-        #self.oracle = oracle
+        self.oracle = oracle
         self.workdir = workdir
 
-    def __call__(self, project, klee=False, env=os.environ):
+    def __call__(self, project, test, klee=False, env=os.environ):
         environment = env
 
         if self.config.verbose:
@@ -25,11 +25,10 @@ class Tester:
             subproc_output = subprocess.DEVNULL
 
         if klee:
-            klee_cmd = 'angelix-run-klee'
-        target = self.get_target(project)
-        cmd = '%s %s' % (klee_cmd, target)
+            environment['ANGELIX_RUN'] = 'angelix-run-klee'
+        
         with cd(project.dir):
-             proc = subprocess.call(cmd,
+             proc = subprocess.call(self.oracle+" "+test,
                                     env=environment,
                                     stdout=subproc_output,
                                     stderr=subproc_output,

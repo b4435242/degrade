@@ -17,6 +17,7 @@ set(LLVM_USED_LIBS clangTooling clangBasic clangAST)
 
 add_executable(apply-patch
   ApplyPatch.cpp
+  ../util.cpp
   )
 
 

@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "../AngelixCommon.h"
-
+#include "../util.h"
 
 std::string isBuggy(int beginLine, int beginColumn, int endLine, int endColumn) {
   std::string line;

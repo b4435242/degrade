@@ -6,3 +6,6 @@
 add_subdirectory(suspicious)
 add_subdirectory(patch)
 add_subdirectory(record)
+add_subdirectory(restore)
+add_subdirectory(harness)
+

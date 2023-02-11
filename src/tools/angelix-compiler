@@ -7,6 +7,11 @@ use strict;
 use warnings;
 use File::Spec;
 
+my $dg_h = $ENV{'DG_RECORD_H'};
+my $dg_obj = $ENV{'DG_RECORD_OBJ'};
+my $record_h = $ENV{'RECORD_FUNC_H'}; # where harness directly calls to
+my $harness = $ENV{'HARNESS_BIN'}; 
+
 my $angelix_header = $ENV{'DG_RUNTIME_H'};
 my $libs_klee = $ENV{'ANGELIX_LIBRARY_PATH_KLEE'};
 my $libs_test = $ENV{'ANGELIX_LIBRARY_PATH_TEST'};
@@ -63,6 +68,21 @@ sub get_target() {
     return undef;
 }
 
+sub get_obj() {
+    my $last_o = 0;
+    foreach (@ARGV) {
+        if ($last_o) {
+            return $_;
+        }
+        if (/^-o$/) {
+            $last_o = 1;
+        }
+        #if (/^-c$/) {
+        #    return "";
+        #}        
+    }
+    return undef;
+}
 sub get_source_cc(){
 	foreach (@ARGV){
 		if (/.(c|s)$/) {
@@ -163,6 +183,10 @@ if ($ARGV[0] eq '--test') {
     exit 1;
 }
 
+my $record_obj = $ARGV[1];
+my $obj = get_obj();
+
+shift @ARGV;
 shift @ARGV;
 
 my $target = get_target();
@@ -172,16 +196,34 @@ print "\n";
 if ($compilation_mode eq "test") {
 
     my @test_comp_args = filter_non_comp_args(\@ARGV, 1);
-    my @args = ("gcc",
-                "-include $angelix_header",                
-                wrap_args(@test_comp_args),
-                "-L$libs_test",
-                "-langelix",
+    my @args;
+
+	if ($target eq $harness){
+		@args    = ("gcc",
+				"-include $record_h",
+				#"-include $dg_h",
+				#"$record_obj_path",
+				wrap_args(@test_comp_args),
+				$target ne "" ? "$dg_obj": "",
+				);
+
+	}
+	else {
+		@args	= ("gcc",
+                #"-include $angelix_header",
+                $obj eq $record_obj? "-include $dg_h": "",
+				wrap_args(@test_comp_args),
+                #"-L$libs_test",
+                #"-langelix",
 # in this generic build, runtime component requires this stub library:                
-                "-L$klee_libs",
-                "-lkleeRuntest",
-                $custom_test_flags
+                #"-L$klee_libs",
+                #"-lkleeRuntest",
+				$target ne "" ? "$dg_obj": "",
+                #$custom_test_flags
                 );
+	}
+
+
     my $call_gcc = join(' ', @args);
     debug($call_gcc);
     system($call_gcc);

@@ -7,384 +7,37 @@
 #include <vector>
 
 #include "../AngelixCommon.h"
-#include "../suspicious/SMTLIB2.h"
+#include "../util.h" 
 
-std::vector<std::vector<int>> positions;
+std::vector<int> position;
 
-enum VarTypes { ALL, INT, INT_AND_PTR };
-
-
-bool suitableVarDecl(VarDecl* vd, VarTypes collectedTypes) {
-  std::cout << vd->getName().str() << " " << vd->getType().getAsString()<<std::endl;
-
-  return (collectedTypes == ALL ||
-          (collectedTypes == INT &&
-           (vd->getType().getTypePtr()->isIntegerType() ||
-            vd->getType().getTypePtr()->isCharType())) ||
-          (collectedTypes == INT_AND_PTR &&
-           (vd->getType().getTypePtr()->isIntegerType() ||
-            vd->getType().getTypePtr()->isCharType() ||
-            vd->getType().getTypePtr()->isPointerType())));
-}
-
-
-bool isBooleanExpr(const Expr* expr) {
-  if (isa<BinaryOperator>(expr)) {
-    const BinaryOperator* op = cast<BinaryOperator>(expr);
-    std::string opStr = BinaryOperator::getOpcodeStr(op->getOpcode()).lower();
-    return opStr == "==" || opStr == "!=" || opStr == "<=" || opStr == ">=" || opStr == ">" || opStr == "<" || opStr == "||" || opStr == "&&";
-  }
-  return false;
-}
-
-
-class CollectVariables : public StmtVisitor<CollectVariables> {
-  std::unordered_set<VarDecl*> *VSet;
-  std::unordered_set<MemberExpr*> *MSet;
-  std::unordered_set<ArraySubscriptExpr*> *ASet;
-  VarTypes Types;
-
-public:
-  CollectVariables(std::unordered_set<VarDecl*> *vset,
-                   std::unordered_set<MemberExpr*> *mset,
-                   std::unordered_set<ArraySubscriptExpr*> *aset, VarTypes t): VSet(vset), MSet(mset), ASet(aset), Types(t) {}
-
-  void Collect(Expr *E) {
-    if (E)
-      Visit(E);
-  }
-
-  void Visit(Stmt* S) {
-    StmtVisitor<CollectVariables>::Visit(S);
-  }
-
-  void VisitBinaryOperator(BinaryOperator *Node) {
-    Collect(Node->getLHS());
-    Collect(Node->getRHS());
-  }
-
-  void VisitUnaryOperator(UnaryOperator *Node) {
-    Collect(Node->getSubExpr());
-  }
-
-  void VisitImplicitCastExpr(ImplicitCastExpr *Node) {
-    Collect(Node->getSubExpr());
-  }
-
-  void VisitParenExpr(ParenExpr *Node) {
-    Collect(Node->getSubExpr());
-  }
-
-  void VisitIntegerLiteral(IntegerLiteral *Node) {
-  }
-
-  void VisitCharacterLiteral(CharacterLiteral *Node) {
-  }
-
-  void VisitMemberExpr(MemberExpr *Node) {
-    if (MSet) {
-      MSet->insert(Node); // TODO: check memeber type?
-    }
-  }
-
-  void VisitDeclRefExpr(DeclRefExpr *Node) {
-    if (VSet && isa<VarDecl>(Node->getDecl())) {
-      VarDecl* vd;
-      if ((vd = cast<VarDecl>(Node->getDecl())) != NULL) {
-        if (suitableVarDecl(vd, Types)) {
-          VSet->insert(vd);
-        }
-      }
-    }
-  }
-
-  void VisitArraySubscriptExpr(ArraySubscriptExpr *Node) {
-    if (ASet) {
-      ASet->insert(Node);
-    }
-  }
-
-
-};
-
-
-std::unordered_set<VarDecl*> collectVarsFromExpr(const Stmt* stmt, VarTypes t) {
-  std::unordered_set<VarDecl*> set;
-  CollectVariables T(&set, NULL, NULL, t);
-  T.Visit(const_cast<Stmt*>(stmt));
-  return set;
-}
-
-
-std::unordered_set<MemberExpr*> collectMemberExprFromExpr(const Stmt* stmt) {
-  std::unordered_set<MemberExpr*> set;
-  CollectVariables T(NULL, &set, NULL, ALL);
-  T.Visit(const_cast<Stmt*>(stmt));
-  return set;
-}
-
-std::unordered_set<ArraySubscriptExpr*> collectArraySubscriptExprFromExpr(const Stmt* stmt) {
-  std::unordered_set<ArraySubscriptExpr*> set;
-  CollectVariables T(NULL, NULL, &set, ALL);
-  T.Visit(const_cast<Stmt*>(stmt));
-  return set;
-}
-
-std::pair< std::unordered_set<VarDecl*>, std::unordered_set<MemberExpr*> > collectVarsFromScope(const DynTypedNode node, ASTContext* context, unsigned line, Rewriter &Rewrite) {
-  VarTypes collectedTypes = INT_AND_PTR;
-  /*if (getenv("ANGELIX_POINTER_VARIABLES")) {
-    collectedTypes = INT_AND_PTR;
-  } else {
-    collectedTypes = INT;
-  }*/
-  
-  //node.dump(llvm::outs(), const_cast<const ASTContext&>(*context));
-  const FunctionDecl* fd;
-  if ((fd = node.get<FunctionDecl>()) != NULL) {
-    std::unordered_set<VarDecl*> var_set;
-    std::unordered_set<MemberExpr*> member_set;
-    //if (getenv("ANGELIX_FUNCTION_PARAMETERS")) {
-      for (auto it = fd->param_begin(); it != fd->param_end(); ++it) {
-        auto vd = cast<VarDecl>(*it);
-		//if (suitableVarDecl(vd, collectedTypes)) {
-          var_set.insert(vd);
-        //}
-      }
-    //}
-
-    //if (getenv("ANGELIX_GLOBAL_VARIABLES")) {
-      clang::DynTypedNodeList parents = context->getParents(node);
-      if (parents.size() > 0) {
-        const DynTypedNode parent = *(parents.begin()); // TODO: for now only first
-        const TranslationUnitDecl* tu;
-        if ((tu = parent.get<TranslationUnitDecl>()) != NULL) {
-          for (auto it = tu->decls_begin(); it != tu->decls_end(); ++it) {
-            if (isa<VarDecl>(*it)) {
-              VarDecl* vd = cast<VarDecl>(*it);
-              unsigned beginLine = getDeclExpandedLine(vd, context->getSourceManager());
-              if (line > beginLine /*&& suitableVarDecl(vd, collectedTypes)*/) {
-                var_set.insert(vd);
-              }
-            }
-          }
-   }
-      }
-    //}
-    std::pair< std::unordered_set<VarDecl*>, std::unordered_set<MemberExpr*> > result(var_set, member_set);
-    return result;
-
-  } else {
-
-    std::unordered_set<VarDecl*> var_set;
-    std::unordered_set<MemberExpr*> member_set;
-    const CompoundStmt* cstmt;
-    if ((cstmt = node.get<CompoundStmt>()) != NULL) {
-      for (auto it = cstmt->body_begin(); it != cstmt->body_end(); ++it) {
-
-        if (isa<BinaryOperator>(*it)) {
-          BinaryOperator* op = cast<BinaryOperator>(*it);
-          SourceRange expandedLoc = getExpandedLoc(op, context->getSourceManager());
-          unsigned beginLine = context->getSourceManager().getExpansionLineNumber(expandedLoc.getBegin());
-          if (line > beginLine &&
-              BinaryOperator::getOpcodeStr(op->getOpcode()).lower() == "=" &&
-              isa<DeclRefExpr>(op->getLHS())) {
-            DeclRefExpr* dref = cast<DeclRefExpr>(op->getLHS());
-            VarDecl* vd;
-            if ((vd = cast<VarDecl>(dref->getDecl())) != NULL /*&& suitableVarDecl(vd, collectedTypes)*/) {
-              var_set.insert(vd);
-            }
-          }
-        }
-
-        if (isa<DeclStmt>(*it)) {
-          DeclStmt* dstmt = cast<DeclStmt>(*it);
-          SourceRange expandedLoc = getExpandedLoc(dstmt, context->getSourceManager());
-          unsigned beginLine = context->getSourceManager().getExpansionLineNumber(expandedLoc.getBegin());
-          if (dstmt->isSingleDecl()) {
-            Decl* d = dstmt->getSingleDecl();
-            if (isa<VarDecl>(d)) {
-              VarDecl* vd = cast<VarDecl>(d);
-              if (line > beginLine && vd->hasInit() /*&& suitableVarDecl(vd, collectedTypes)*/) {
-                var_set.insert(vd);
-              } else {
-                //if (getenv("ANGELIX_INIT_UNINIT_VARS")) { //local
-                  if (line > beginLine /*&& suitableVarDecl(vd, collectedTypes)*/) {
-                    std::ostringstream stringStream;
-                    stringStream << vd->getType().getAsString() << " "
-                                 << vd->getNameAsString()
-                                 << " = 0;";
-                    std::string replacement = stringStream.str();
-                    Rewrite.ReplaceText(expandedLoc, replacement);
-                    var_set.insert(vd);
-                  }
-                //}
-              }
-            }
-          }
-        }
-
-        //if (getenv("ANGELIX_USED_VARIABLES")) {
-          Stmt* stmt = cast<Stmt>(*it);
-          SourceRange expandedLoc = getExpandedLoc(stmt, context->getSourceManager());
-          unsigned beginLine = context->getSourceManager().getExpansionLineNumber(expandedLoc.getBegin());
-          if (line > beginLine) {
-            std::unordered_set<VarDecl*> varsFromExpr = collectVarsFromExpr(*it, collectedTypes);
-            var_set.insert(varsFromExpr.begin(), varsFromExpr.end());
-
-            //TODO: should be generalized for other cases:
-            if (isa<IfStmt>(*it)) {
-              IfStmt* ifStmt = cast<IfStmt>(*it);
-              Stmt* thenStmt = ifStmt->getThen();
-              if (isa<CallExpr>(*thenStmt)) {
-                CallExpr* callExpr = cast<CallExpr>(thenStmt);
-                for (auto a = callExpr->arg_begin(); a != callExpr->arg_end(); ++a) {
-                  auto e = cast<Expr>(*a);
-                  std::unordered_set<MemberExpr*> membersFromArg = collectMemberExprFromExpr(e);
-                  member_set.insert(membersFromArg.begin(), membersFromArg.end());
-                }
-              }
-            }
-          }
-        //}
-
-      }
-    }
-
-    clang::DynTypedNodeList parents = context->getParents(node);
-    if (parents.size() > 0) {
-      const DynTypedNode parent = *(parents.begin()); // TODO: for now only first
-      std::pair< std::unordered_set<VarDecl*>, std::unordered_set<MemberExpr*> > parent_vars = collectVarsFromScope(parent, context, line, Rewrite);
-      var_set.insert(parent_vars.first.cbegin(), parent_vars.first.cend());
-      member_set.insert(parent_vars.second.cbegin(), parent_vars.second.cend());
-    }
-    std::pair< std::unordered_set<VarDecl*>, std::unordered_set<MemberExpr*> > result(var_set, member_set);
-    return result;
-  }
-}
 
 void parse_position(int argc, const char** argv, int offset){
-	int n = (argc-offset)/4;
-	int count = offset;
 	
-	positions.resize(n, std::vector<int>(4));
-	for(int i=0; i<n; i++)
-		for(int j=0; j<4; j++)
-			positions[i][j] = atoi(argv[count++]);	
+	position.resize(4);
+	for(int i=0; i<4; i++)
+		position[i] = atoi(argv[offset+i]);	
 	
 }
 
-bool isRecord(int beginLine, int beginCol, int endLine, int endCol) {
-  for(auto &pos: positions)
-	if (pos[0]==beginLine && pos[1]==beginCol && pos[2]==endLine && pos[3]==endCol)
-	return true;
-  
-  return false;
+bool is_position(int beginLine, int beginCol, int endLine, int endCol) {
+  return position[0]==beginLine && position[1]==beginCol && position[2]==endLine && position[3]==endCol;
 }
 
-
-class ExpressionHandler : public MatchFinder::MatchCallback {
-public:
-  ExpressionHandler(Rewriter &Rewrite, std::string t) : Rewrite(Rewrite), type(t) {}
-
-  virtual void run(const MatchFinder::MatchResult &Result) override{
-    if (const Expr *expr = Result.Nodes.getNodeAs<clang::Expr>("repairable")) {
-      SourceManager &srcMgr = Rewrite.getSourceMgr();
-
-      SourceRange expandedLoc = getExpandedLoc(expr, srcMgr);
-
-      unsigned beginLine = srcMgr.getExpansionLineNumber(expandedLoc.getBegin());
-      unsigned beginColumn = srcMgr.getExpansionColumnNumber(expandedLoc.getBegin());
-      unsigned endLine = srcMgr.getExpansionLineNumber(expandedLoc.getEnd());
-      unsigned endColumn = srcMgr.getExpansionColumnNumber(expandedLoc.getEnd());
-
-      if (! isRecord(beginLine, beginColumn, endLine, endColumn)) {
-        return;
-      }
-
-      std::cout << beginLine << " " << beginColumn << " " << endLine << " " << endColumn << "\n"
-                << toString(expr) << "\n";
-
-      std::ostringstream exprId;
-      exprId << beginLine << "-" << beginColumn << "-" << endLine << "-" << endColumn;
-      std::string extractedDir(getenv("ANGELIX_EXTRACTED"));
-      std::ofstream fs(extractedDir + "/" + exprId.str() + ".smt2");
-      fs << "(assert " << toSMTLIB2(expr) << ")\n";
-
-      const DynTypedNode node = DynTypedNode::create(*expr);
-      std::pair< std::unordered_set<VarDecl*>, std::unordered_set<MemberExpr*> > varsFromScope = collectVarsFromScope(node, Result.Context, beginLine, Rewrite);
-      std::unordered_set<VarDecl*> varsFromExpr = collectVarsFromExpr(expr, ALL);
-      std::unordered_set<MemberExpr*> memberFromExpr = collectMemberExprFromExpr(expr);
-      std::unordered_set<ArraySubscriptExpr*> arraySubscriptFromExpr = collectArraySubscriptExprFromExpr(expr);
-      std::unordered_set<VarDecl*> vars;
-      vars.insert(varsFromScope.first.begin(), varsFromScope.first.end());
-      vars.insert(varsFromExpr.begin(), varsFromExpr.end());
-      std::unordered_set<MemberExpr*> members;
-      members.insert(varsFromScope.second.begin(), varsFromScope.second.end());
-      members.insert(memberFromExpr.begin(), memberFromExpr.end());
-      std::ostringstream exprStream;
-      std::ostringstream nameStream;
-      bool first = true;
-      for (auto it = vars.begin(); it != vars.end(); ++it) {
-        if (first) {
-          first = false;
-        } else {
-          exprStream << ", ";
-          nameStream << ", ";
-        }
-        VarDecl* var = *it;
-        exprStream << var->getName().str();
-        nameStream << "\"" << var->getName().str() << "\"";
-      }
-      for (auto it = members.begin(); it != members.end(); ++it) {
-        if (first) {
-          first = false;
-        } else {
-          exprStream << ", ";
-          nameStream << ", ";
-        }
-        MemberExpr* me = *it;
-        exprStream << toString(me);
-        nameStream << "\"" << toString(me) << "\"";
-      }
-      for (auto it = arraySubscriptFromExpr.begin(); it != arraySubscriptFromExpr.end(); ++it) {
-        if (first) {
-          first = false;
-        } else {
-          exprStream << ", ";
-          nameStream << ", ";
-        }
-        ArraySubscriptExpr* ae = *it;
-        exprStream << toString(ae->getLHS()) << "[" << toString(ae->getRHS()) << "]";
-        nameStream << "\"" <<  toString(ae->getLHS()) << "_LBRSQR_" << toString(ae->getRHS()) << "_RBRSQR_" << "\"";
-      }
-
-      int size = vars.size() + members.size() + arraySubscriptFromExpr.size();
-
-      std::ostringstream stringStream;
-      stringStream << "ANGELIX_CHOOSE("
-                   << type << ", "
-                   << toString(expr) << ", "
-                   << beginLine << ", "
-                   << beginColumn << ", "
-                   << endLine << ", "
-                   << endColumn << ", "
-                   << "((char*[]){" << nameStream.str() << "}), "
-                   << "((int[]){" << exprStream.str() << "}), "
-                   << size
-                   << ")";
-      std::string replacement = stringStream.str();
-
-      Rewrite.ReplaceText(expandedLoc, replacement);
+template<typename T>
+int getSize(T vd) {
+    const clang::Type *type = vd->getType().getTypePtr();
+    while (type->isPointerType()){
+        type = type->getPointeeType().getTypePtr();
     }
-  }
+    /*if (type->isRecordType()){
+        const RecordType *rtype = dyn_cast<RecordType>(type);
+        if (!rtype || !rtype->getDecl()) // exclude if size is not determined
+            return 0;
+    }*/
 
-private:
-  Rewriter &Rewrite;
-  std::string type;
-
-};
-
-
+    return vd->getASTContext().getTypeInfo(type).Width;
+}
 
 
 class StatementHandler : public MatchFinder::MatchCallback {
@@ -402,24 +55,30 @@ public:
       unsigned endLine = srcMgr.getExpansionLineNumber(expandedLoc.getEnd());
       unsigned endColumn = srcMgr.getExpansionColumnNumber(expandedLoc.getEnd());
 
-      if (! isRecord(beginLine, beginColumn, endLine, endColumn)) {
-        return;
-      }
-
-      /*std::cout << beginLine << " " << beginColumn << " " << endLine << " " << endColumn << "\n"
+      std::cout << beginLine << " " << beginColumn << " " << endLine << " " << endColumn << "\n"
                 << toString(stmt) << "\n";
+      
+      if (!is_position(beginLine, beginColumn, endLine, endColumn))
+      	return;
+      
 
-      std::ostringstream stmtId;
+      /*std::ostringstream stmtId;
       stmtId << beginLine << "-" << beginColumn << "-" << endLine << "-" << endColumn;
       std::string extractedDir(getenv("ANGELIX_EXTRACTED"));
       std::ofstream fs(extractedDir + "/" + stmtId.str() + ".smt2");
       fs << "(assert (not (= 1 0)))\n";*/
 
       const DynTypedNode node = DynTypedNode::create(*stmt);
-      std::pair< std::unordered_set<VarDecl*>, std::unordered_set<MemberExpr*> > varsFromScope = collectVarsFromScope(node, Result.Context, beginLine, Rewrite);
+	  VarTypes collectedTypes = ALL;
+      std::pair< std::unordered_set<VarDecl*>, std::unordered_set<MemberExpr*> > varsFromScope = collectVarsFromScope(node, Result.Context, beginLine, Rewrite, collectedTypes);
       std::unordered_set<VarDecl*> vars;
       vars.insert(varsFromScope.first.begin(), varsFromScope.first.end());
-      //FIXME: why no members here?
+      
+	  std::unordered_map<std::string, RecordDecl::field_iterator> ptrs;
+	  std::unordered_map<std::string, std::string> exprs;
+	  getPtrInStruct(Result.Context, vars, ptrs, exprs);
+
+	  //FIXME: why no members here?
       std::ostringstream exprStream;
       std::ostringstream nameStream;
       std::ostringstream typeStream;
@@ -438,18 +97,40 @@ public:
         exprStream << "&" << var->getName().str();
         nameStream << "\"" << var->getName().str() << "\"";
       	typeStream << "\"" << var->getType().getAsString() << "\"" ;
-	  	sizeStream << var->getASTContext().getTypeInfo(var->getType()).Width/8;
-	  }
+		sizeStream << getSize<VarDecl*>(var)/8;  
+	    //sizeStream << "sizeof(" <<  getDeference<VarDecl*>(var, var->getName().str()) << ")";
+    }
+    int n_ptr_in_struct = 0;
+	for (auto it = ptrs.begin(); it != ptrs.end(); ++it) {
+        std::string name = it->first;
+		std::string expr = exprs[name];
+        auto var = it->second;
+        int size = getSize<RecordDecl::field_iterator>(var)/8;
+        if (size==0) 
+            continue;
+        if (first) {
+          first = false;
+        } else {
+          exprStream << ", ";
+          nameStream << ", ";
+		  typeStream << ", ";
+		  sizeStream << ", ";
+        }
+		exprStream << expr;
+        nameStream << "\"" << name << "\"";
+      	typeStream << "\"" << var->getType().getAsString() << "\"" ;
+		sizeStream << size;
+        n_ptr_in_struct++;
+	    //sizeStream << "sizeof(" <<  getDeference<RecordDecl::field_iterator>(var, expr) << ")"; 
+    }
 
 
 
-      int size = vars.size();
+      int size = vars.size() + n_ptr_in_struct;
       std::string indent(beginColumn-1, ' ');
 
       std::ostringstream stringStream;
-      stringStream << toString(stmt)
-                   << ";\n"
-				   << indent
+      stringStream << indent
 				   << "DG_RECORD("
                    << beginLine << ", "
                    << beginColumn << ", "
@@ -460,7 +141,9 @@ public:
 				   << "((void*[]){" << exprStream.str() << "}), "
 				   << "((int[]){" << sizeStream.str() << "}), "
                    << size
-                   << ")";
+                   << ");\n";
+	  
+	  stringStream << toString(stmt);
       std::string replacement = stringStream.str();
 
       Rewrite.ReplaceText(expandedLoc, replacement);
@@ -475,33 +158,30 @@ private:
 
 class MyASTConsumer : public ASTConsumer {
 public:
-  MyASTConsumer(Rewriter &R) : HandlerForIntegerExpressions(R, "int"),
-                               HandlerForBooleanExpressions(R, "bool"),
-                               HandlerForStatements(R) {	
-	Matcher.addMatcher(RepairableAssignment, &HandlerForIntegerExpressions);
-	Matcher.addMatcher(InterestingRepairableCondition, &HandlerForBooleanExpressions);
+  MyASTConsumer(Rewriter &R) : HandlerForStatements(R) {	
 	Matcher.addMatcher(InterestingStatement, &HandlerForStatements);
+  	//Matcher.addMatcher(stmt().bind("repairable"), &HandlerForStatements);
   }
 
   void HandleTranslationUnit(ASTContext &Context) override {
     Matcher.matchAST(Context);
+    
+    const clang::SourceManager &SM = Context.getSourceManager();
   }
 
 private:
-	ExpressionHandler HandlerForIntegerExpressions;
-	ExpressionHandler HandlerForBooleanExpressions;
 	StatementHandler HandlerForStatements;
-
-  MatchFinder Matcher;
+	MatchFinder Matcher;
 };
 
 
-class InstrumentSuspiciousAction : public ASTFrontendAction {
+class MyFrontendAction : public ASTFrontendAction {
 public:
-  InstrumentSuspiciousAction() {}
+  MyFrontendAction() {}
 
   void EndSourceFileAction() override {
     FileID ID = TheRewriter.getSourceMgr().getMainFileID();
+	std::cout << TheRewriter.getSourceMgr().getFileEntryForID(ID)->getName().str()<<std::endl;
     if (INPLACE_MODIFICATION) {
       //overwriteMainChangedFile(TheRewriter);
       TheRewriter.overwriteChangedFiles();
@@ -538,6 +218,5 @@ int main(int argc, const char **argv) {
 
 	// We hand the CompilationDatabase we created and the sources to run over into the tool constructor.
 	ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
-
-	return Tool.run(newFrontendActionFactory<InstrumentSuspiciousAction>().get());
+	return Tool.run(newFrontendActionFactory<MyFrontendAction>().get());
 }

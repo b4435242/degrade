@@ -1,64 +1,33 @@
-#ifndef _RECORD_
-#define _RECORD_
+#ifndef _RECORD_H_
+#define _RECORD_H_
 
-#include <vector>
-#include <unordered_map>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <sys/stat.h>
-#include <ctime>
-#include <regex>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/time.h>
+#include <string.h>
 
-#include "rapidjson/document.h" 
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h" 
-
-using namespace std;
-
-string loc_to_string(vector<int> &loc);
-string get_base_type(string type);
-vector<int> get_arr_size(string type);
-
-
-class Record {
-public:
-	Record(vector<int>& _loc): loc(_loc){}
-
-	void write_to_json();
-
-
-	template<typename T>
-	void dump_val(char* name, T val);
-	template<typename T>
-	void dump_arr(char* name, T ptr, vector<int> &sizes);
-	template<typename T>
-	void dump_2d_arr(char* name, T ptr, vector<int> &sizes);
-
-
-	// read manual cheatsheet of len id of ptr 
-	static void read_lenIdOfPtr();
-	vector<int> get_ptr_size(char*);
-		
-private:
-	rapidjson::Document doc;
-	rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
-	vector<int> loc;
-	// In order to dump data of pointer
-	// pos -> var -> id of len
-public:
-	static bool lenIdOfPtr_flag;
-	unordered_map<string, vector<int>> len2val;	
-	static unordered_map<string, unordered_map<string, vector<string>>> lenIdOfPtr;
-
-};
-
+#include "ht_table.h"
 //
 // API
 // typename -> var_id -> val
 //
-void DG_RECORD(int beginLine, int beginCol, int endLine, int endCol, char** na
-mes, char** types, void** vals, int size);
+void DG_RECORD(int beginLine, int beginCol, int endLine, int endCol, char** names, char** types, void** refs, int* sizes, int var_size);
+//void DG_RESTORE(int beginLine, int beginCol, int endLine, int endCol, char** names, char** types, void** refs, int* sizes, int var_size);
+void DG_RESTORE(int beginLine, int beginCol, int endLine, int endCol, char* name, char* type, void* ref, int size);
+// utils
 
+/*int get_ptr_dim(char* t);
+int get_ptr_basesize(char* t);
+char* dump_sep(char* buf);
+char* dump_name(char* name, char* buf);
+char* dump_int(int num, char* buf);
+char* dump_byte(void* ref, char* buf, int size);
+char* dump_ptr(void* ref, int dim, char* buf, int* sizes, int base_size);
+void init_ptrlen_table();
+void init_lenval_table();
+void set_ptr_size(hashtable_t* hashtable, char* name, void* ref);
+int* get_ptr_size(hashtable_t* hashtable, char* name, int base_size, int dim);
+void write_buf(char* buf, int size);
+long long current_timestamp();
+void join_path(char *dest, char* prefix, char* suffix);*/
 #endif
