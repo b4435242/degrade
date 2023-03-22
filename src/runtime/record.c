@@ -1,6 +1,6 @@
 #include "record.h" 
 
-#define MAX_BUF 100000
+#define MAX_BUF 500000
 #define MAX_PTR 100
 #define MAX_NAME 30
 #define MAX_DIM 5
@@ -26,7 +26,7 @@ char* dump_ptr(void* ref, int dim, char* buf, int* sizes, int base_size);
 void init_ptrlen_table();
 void init_lenval_table();
 void set_ptr_size(hashtable_t* hashtable, char* name, void* ref);
-int* get_ptr_size(hashtable_t* hashtable, char* name, int base_size, int dim);
+void get_ptr_size(hashtable_t* hashtable, char* name, int base_size, int dim, int *sizes);
 void write_buf(char* buf, int size);
 long long current_timestamp();
 void join_path(char *dest, char* prefix, char* suffix);
@@ -87,7 +87,8 @@ void DG_RECORD(int beginLine, int beginCol, int endLine, int endCol, char** name
 		if (dim>0){
 			int base_size = size;
 			//pbuf = dump_int(base_size, pbuf);
-			int* dim_sizes = get_ptr_size(lenval_table, name, base_size, dim);
+			int dim_sizes[10];
+			get_ptr_size(lenval_table, name, base_size, dim, dim_sizes);
 			for(int i=1; i<dim; i++)
 				pbuf = dump_int(dim_sizes[i], pbuf);
 			
@@ -96,7 +97,7 @@ void DG_RECORD(int beginLine, int beginCol, int endLine, int endCol, char** name
             void *ptr = *((void**) ref);
 			pbuf = dump_ptr(ptr, dim, pbuf, dim_sizes, base_size);
 			
-			free(dim_sizes);
+			//free(dim_sizes);
 		} 
 		else {
 			pbuf = dump_int(size, pbuf); 
@@ -226,7 +227,7 @@ void set_ptr_size(hashtable_t* hashtable, char* name, void* ref){
 	}
 } 
 
-int* get_ptr_size(hashtable_t* hashtable, char* name, int base_size, int dim){
+void get_ptr_size(hashtable_t* hashtable, char* name, int base_size, int dim, int *sizes){
 	int ptr_idx = -1;
 	// get ptr index corressponding to index of len
 	for(int i=0; i<ptr_cnt; i++){
@@ -238,14 +239,14 @@ int* get_ptr_size(hashtable_t* hashtable, char* name, int base_size, int dim){
 	
 
 	// Use name of len to get runtime value of len
-	int *sizes = malloc(dim*sizeof(int));
-	memset(sizes, 0, dim*sizeof(int));
+	//int *sizes = malloc(dim*sizeof(int));
+	//memset(sizes, 0, dim*sizeof(int));
 	
 	if (ptr_idx==-1) // Not specify in file
 	{
 		for(int i=0; i<dim; i++) 
             sizes[i] = 1; // default 1 for all dim
-		return sizes;
+		return;// sizes;
 	}
 
 	// char 0 dim is ignored
@@ -260,7 +261,7 @@ int* get_ptr_size(hashtable_t* hashtable, char* name, int base_size, int dim){
 		sizes[i] = ht_get(hashtable, len_name, &table_miss);
 	}
 
-	return sizes;
+	return;// sizes;
 }
 
 void write_buf(char* buf, int buf_size){

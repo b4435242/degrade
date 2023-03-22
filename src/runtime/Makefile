@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-I $(KLEE_INCLUDE_PATH)
 
 DEP = runtime.h
-SRC = runtime.c
+SRC = runtime.c restore.c
 OBJ_KLEE = $(SRC:%.c=%.klee.o)
 OBJ_TEST = $(SRC:%.c=%.test.o)
 

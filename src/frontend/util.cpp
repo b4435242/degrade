@@ -281,13 +281,14 @@ int getSize(T vd) {
 }*/
 
 
-void getPtrInStruct(ASTContext* Context, std::unordered_set<VarDecl*> &vars, std::unordered_map<std::string, RecordDecl::field_iterator> &ptrs, std::unordered_map<std::string, std::string> &exprs){
+void getPtrInStruct(ASTContext* Context, std::unordered_set<VarDecl*> &vars, std::map<std::string, RecordDecl::field_iterator> &ptrs, std::map<std::string, std::string> &exprs, std::map<std::string, int> &sizes){
     StructVisitor visitor(Context);
     for(auto &var: vars){
         visitor.TraverseDecl(var);
     }
     ptrs = visitor.vars;
 	exprs = visitor.exprs;
+	sizes = visitor.sizes;
 }
 
 
@@ -305,43 +306,57 @@ bool StructVisitor::VisitVarDecl(VarDecl* vd) {
 bool StructVisitor::VisitRecordDecl(RecordDecl* rd){
 	//const VarDecl* var = dyn_cast<VarDecl*>(rd);
 	//const RecordType *rtype = dyn_cast<RecordType>(var->getType().getTypePtr());
-	const RecordType* rtype = rd->getTypeForDecl();
-	if (!rtype || !rtype->getDecl())
+	const RecordType* rtype = dyn_cast<RecordType>(rd->getTypeForDecl());
+	//const ASTRecordLayout& layout = rd->getASTContext().getASTRecordLayout(rd);
+
+	if (!rd->getDefinition() || !rd->isCompleteDefinition())
 		return false;
+	//int size = 0;
+	unsigned size = rd->getASTContext().getTypeSize(rtype);
 	for(auto it=rd->field_begin(); it!=rd->field_end(); it++){
 
         const clang::Type* t = it->getType().getTypePtr();
-        if (t->isPointerType()){ // only dump pointer type inside a struct
-            t = t->getPointeeType().getTypePtr();
-            if (t->isRecordType()){
+      
+		if (t->isPointerType()){ // only dump pointer type inside a struct
+			const clang::Type* pointee = t->getPointeeType().getTypePtr();
+            /*if (t->isRecordType()){
                 const RecordType *rtype = dyn_cast<RecordType>(t);
-                /*if (!rtype || !rtype->getDecl()) // exclude if size is not determine
-                	continue;*/
-            }
-
+                if (!rtype || !rtype->getDecl()){ // exclude if size is not determine
+                	std::cout << it->getName().str() <<std::endl;
+					continue;
+				}
+            }*/
+			
             std::string name = it->getName().str();
             auto v = get_nullsafe_expr_and_name(name);
             std::string nullsafe_expr = v[0], full_name = v[1];
 			vars[full_name] = it;
 			exprs[full_name] = nullsafe_expr;
-
-        }
-
-    }
-
-    for(auto it=rd->field_begin(); it!=rd->field_end(); it++){
-
-        const clang::Type* t = it->getType().getTypePtr();
+			if (!pointee->isRecordType()){
+				std::cout << it->getType().getAsString() << std::endl;
+				sizes[full_name] = it->getASTContext().getTypeInfo(pointee).Width/8;
+        	}
+		}
+		
         if (t->isStructureType() || (t->isPointerType()&&t->getPointeeType().getTypePtr()->isStructureType())){
             RecordDecl *child_rd = get_recordDecl<RecordDecl::field_iterator>(it);
-            if (rd->getName().str() == child_rd->getName().str()) // exclude link-list case
+            if (child_rd==NULL || rd->getName().str() == child_rd->getName().str()) // exclude link-list case
                 continue;
-
             record_push<RecordDecl::field_iterator>(it);
             TraverseDecl(child_rd);
             record_pop();
         }
+		
+		/*if (t->isStructureType()){
+			std::string field_name = get_nullsafe_expr_and_name(it->getNameAsString())[1];
+			size += sizes[field_name];
+		} else {
+			size += it->getASTContext().getTypeInfo(t).Width/8;
+		}*/
     }
+	std::string struct_name = get_struct_name();
+	sizes[struct_name] = size;
+
 
     return false;
 }
@@ -358,6 +373,17 @@ void StructVisitor::record_push(T decl){
 void StructVisitor::record_pop(){
     name_v.pop_back();
     sign_v.pop_back();
+}
+
+std::string StructVisitor::get_struct_name(){
+	std::string curr;
+	int n = name_v.size();
+	for(int i=0; i<n; i++){
+		curr += name_v[i];
+		if (i!=n-1)
+			curr += sign_v[i];
+	}
+	return curr;
 }
 
 std::vector<std::string> StructVisitor::get_nullsafe_expr_and_name(std::string name){

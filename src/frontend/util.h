@@ -22,6 +22,7 @@
 #include "clang/ASTMatchers/ASTMatchers.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Lex/Preprocessor.h"
+#include "clang/AST/RecordLayout.h"
 
 
 using namespace clang;
@@ -44,7 +45,7 @@ bool overwriteMainChangedFile(Rewriter &TheRewriter);
 //template<typename T>
 //int getSize(T vd);
 
-void getPtrInStruct(ASTContext* Context, std::unordered_set<VarDecl*> &vars, std::unordered_map<std::string, RecordDecl::field_iterator> &ptrs, std::unordered_map<std::string, std::string> &exprs);
+void getPtrInStruct(ASTContext* Context, std::unordered_set<VarDecl*> &vars, std::map<std::string, RecordDecl::field_iterator> &ptrs, std::map<std::string, std::string> &exprs, std::map<std::string, int>& sizes);
 
 class StructVisitor : public RecursiveASTVisitor<StructVisitor> {
 public:
@@ -58,15 +59,16 @@ public:
 	void record_pop();
 
 	std::vector<std::string> get_nullsafe_expr_and_name(std::string name);
-
+	std::string get_struct_name();
 	template<typename T>
 	RecordDecl* get_recordDecl(T decl);
 private:
     ASTContext *Context;
 	std::vector<std::string> name_v, sign_v;
 public:
-	std::unordered_map<std::string, RecordDecl::field_iterator> vars;
-	std::unordered_map<std::string, std::string> exprs;
+	std::map<std::string, RecordDecl::field_iterator> vars;
+	std::map<std::string, std::string> exprs;
+	std::map<std::string, int> sizes;
 };
 
 

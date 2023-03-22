@@ -134,9 +134,10 @@ public:
 			std::pair< std::unordered_set<VarDecl*>, std::unordered_set<MemberExpr*>> varsFromScope = collectVarsFromScope(node, Context, beginLine, Rewrite, collectedTypes);
 			std::unordered_set<VarDecl*> vars;
 			vars.insert(varsFromScope.first.begin(), varsFromScope.first.end());
-			std::unordered_map<std::string, RecordDecl::field_iterator> ptrs;
-			std::unordered_map<std::string, std::string> exprs;
-			getPtrInStruct(Context, vars, ptrs, exprs);
+			std::map<std::string, RecordDecl::field_iterator> ptrs;
+			std::map<std::string, std::string> exprs;
+			std::map<std::string, int> sizes;
+			getPtrInStruct(Context, vars, ptrs, exprs, sizes);
 			
 			std::ostringstream stringStream; 
       		//FIXME: why no members here?
@@ -181,23 +182,11 @@ public:
         		std::string expr = exprs[name];
 				auto var = it->second;
 
-        		int size = getSize<RecordDecl::field_iterator>(var)/8;
-        		if (size==0) 
+        		//int size = getSize<RecordDecl::field_iterator>(var)/8;
+        		int size = sizes[name];
+				if (size==0) 
             		continue;
-        		/*if (first) {
-          			first = false;
-        		} else {
-          			exprStream << ", ";
-          			nameStream << ", ";
-		  			typeStream << ", ";
-		  			sizeStream << ", ";
-        		}
-				exprStream << expr;
-        		nameStream << "\"" << var->getName().str() << "\"";
-      			typeStream << "\"" << var->getType().getAsString() << "\"" ;
-				sizeStream << size;
-        		n_ptr_in_struct++;*/
-				stringStream << "DG_RESTORE("
+        		stringStream << "DG_RESTORE("
 						 << beginLine << ", "
 						 << beginCol << ", "
 						 << endLine << ", "

@@ -9,7 +9,7 @@ use File::Spec;
 
 my $dg_h = $ENV{'DG_RECORD_H'};
 my $dg_obj = $ENV{'DG_RECORD_OBJ'};
-my $record_h = $ENV{'RECORD_FUNC_H'}; # where harness directly calls to
+my $harness_func_h = $ENV{'HARNESS_FUNC_H'}; # where harness directly calls to
 my $harness = $ENV{'HARNESS_BIN'}; 
 
 my $angelix_header = $ENV{'DG_RUNTIME_H'};
@@ -85,11 +85,11 @@ sub get_obj() {
 }
 sub get_source_cc(){
 	foreach (@ARGV){
-		if (/.(c|s)$/) {
+		if (/.+\.c$/) {
 			return "clang-11";
 		}
-		if (/.cpp$/) {
-			return "clang++-11";
+		if (/.+\.s$/) {
+			return "llvm-as";
 		}
 	}
 	return undef;
@@ -200,7 +200,7 @@ if ($compilation_mode eq "test") {
 
 	if ($target eq $harness){
 		@args    = ("gcc",
-				"-include $record_h",
+				"-include $harness_func_h",
 				#"-include $dg_h",
 				#"$record_obj_path",
 				wrap_args(@test_comp_args),
@@ -246,10 +246,15 @@ if ($compilation_mode eq "test") {
         
         my @klee_comp_args = filter_non_comp_args(\@ARGV, 0);
         my $cc = get_source_cc();
-		
-		my @args = ($cc,
+	 	
+		my @args;
+
+		if ($cc eq "clang-11"){
+			@args = ("$cc",
                     # it breaks compilation of .s files on openssl:
-                    "-include $angelix_header",
+                    "-include $dg_h",
+					"-include $angelix_header",
+					"-include $harness_func_h",
 					"-emit-llvm",
                     "-g",
                     "-O0",
@@ -257,8 +262,13 @@ if ($compilation_mode eq "test") {
 					"-disable-O0-optnone",
                     "-D ANGELIX_SYMBOLIC_RUNTIME",
                     wrap_args(@klee_comp_args),
-                    $custom_klee_compile_flags);
-        my $call_llvm_gcc = join(' ', @args);
+					$custom_klee_compile_flags);
+        } else {
+			@args = ("$cc",
+				wrap_args(@klee_comp_args));
+
+		}
+		my $call_llvm_gcc = join(' ', @args);
         debug($call_llvm_gcc);
         system($call_llvm_gcc);
         
@@ -276,7 +286,7 @@ if ($compilation_mode eq "test") {
         my @args = ("llvm-link",
                     #"--disable-opt",
                     wrap_args(@link_args),
-                    #"$libs_klee",
+                    "$libs_klee",
                     #"-langelix",
                     $custom_klee_link_flags);
         my $call_llvm_ld = join(' ', @args);
